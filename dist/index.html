@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PocketPlay — Screen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+    <style>*{box-sizing:border-box}body{color:#fff;background:#0f0f1a;flex-direction:column;align-items:center;min-height:100dvh;margin:0;padding:28px 24px 48px;font-family:Inter,sans-serif;display:flex}.brand{align-items:center;gap:14px;margin-bottom:6px;display:flex}.logo{border:3px solid #6c5ce7;border-radius:8px;width:26px;height:34px;position:relative}.logo:after{content:"";background:#00d2a8;border-radius:50%;width:8px;height:8px;position:absolute;bottom:5px;left:50%;transform:translate(-50%)}.brand h1{letter-spacing:-.5px;margin:0;font-family:Poppins,sans-serif;font-size:2rem;font-weight:800}section{flex-direction:column;align-items:center;width:100%;max-width:1100px;display:flex}section[hidden]{display:none}.tagline{color:#a0a0b8;margin:4px 0 2px;font-size:1.1rem}.hint{color:#6c5ce7;margin:8px 0 0;font-weight:600}#qr-container{background:#fff;border-radius:22px;margin-top:22px;padding:18px;box-shadow:0 0 80px #6c5ce759}#qr-code{width:260px;height:260px;display:block}#qr-url{color:#6c5ce7;text-align:center;word-break:break-all;max-width:420px;margin-top:12px;margin-left:auto;margin-right:auto;font-family:ui-monospace,Cascadia Mono,Consolas,monospace;font-size:.95rem}#status{color:#a0a0b8;text-align:center;min-height:1.5em;margin-top:22px;font-size:1.1rem}#players{flex-wrap:wrap;justify-content:center;gap:12px;min-height:40px;margin-top:14px;display:flex}.player-chip{background:#6c5ce7;border-radius:999px;padding:9px 20px;font-family:Poppins,sans-serif;font-weight:600}.primary-btn{color:#0f0f1a;cursor:pointer;background:#00d2a8;border:none;border-radius:16px;margin-top:26px;padding:18px 54px;font-family:Poppins,sans-serif;font-size:1.25rem;font-weight:700;transition:transform 80ms}.primary-btn:not(:disabled):active{transform:scale(.97)}.primary-btn:disabled{opacity:.35;cursor:not-allowed}.hud{align-items:center;gap:18px;width:100%;margin-top:10px;display:flex}#q-counter{color:#a0a0b8;white-space:nowrap;font-family:Poppins,sans-serif;font-weight:600}.timer{background:#1a1a2e;border-radius:999px;flex:1;height:12px;overflow:hidden}#timer-fill{background:linear-gradient(90deg,#6c5ce7,#00d2a8);border-radius:999px;width:100%;height:100%;transition:width 1s linear}#timer-fill.urgent{background:#ff7675}#timer-num{text-align:right;min-width:2ch;font-family:Poppins,sans-serif;font-size:1.5rem;font-weight:700}#timer-num.urgent{color:#ff7675}#question-text{text-align:center;max-width:900px;margin:30px 0 0;font-family:Poppins,sans-serif;font-size:2.1rem;font-weight:700;line-height:1.3}#reveal-banner{color:#00d2a8;text-align:center;min-height:1.6em;margin-top:16px;font-family:Poppins,sans-serif;font-size:1.3rem;font-weight:600}#answers{grid-template-columns:1fr 1fr;gap:18px;width:100%;max-width:900px;margin-top:26px;display:grid}.answer{background:#1a1a2e;border:2px solid #0000;border-radius:20px;align-items:center;gap:18px;padding:20px 24px;transition:border-color .2s,background .2s,opacity .3s;display:flex}.badge{border-radius:13px;flex-shrink:0;place-items:center;width:46px;height:46px;font-family:Poppins,sans-serif;font-size:1.35rem;font-weight:700;display:grid}.badge-a{color:#fff;background:#6c5ce7}.badge-b{color:#0f0f1a;background:#00d2a8}.badge-x{color:#fff;background:#fd79a8}.badge-y{color:#0f0f1a;background:#fdcb6e}.answer-body{min-width:0}.answer-text{font-family:Poppins,sans-serif;font-size:1.4rem;font-weight:600;line-height:1.25;display:block}.picks{color:#a0a0b8;min-height:1.2em;margin-top:6px;font-size:.95rem;display:block}.answer.correct{background:#00d2a81f;border-color:#00d2a8}.answer.wrongish{background:#ff767514;border-color:#ff7675b3}.answer.dimmed{opacity:.35}#answered-count{color:#a0a0b8;min-height:1.4em;margin-top:22px;font-size:1rem}#scoreboard{flex-wrap:wrap;justify-content:center;gap:14px;margin-top:18px;display:flex}.score-row{background:#1a1a2e;border-radius:15px;align-items:center;gap:11px;padding:11px 20px;display:flex}.score-dot{background:#3a3a52;border-radius:50%;flex-shrink:0;width:10px;height:10px}.score-dot.answered{background:#00d2a8;box-shadow:0 0 9px #00d2a8}.score-name{font-weight:600}.score-value{color:#00d2a8;font-family:Poppins,sans-serif;font-weight:700}.kicker{color:#a0a0b8;text-transform:uppercase;letter-spacing:4px;margin:30px 0 6px;font-size:.9rem;font-weight:600}#winner-name{background:linear-gradient(90deg,#6c5ce7,#00d2a8);color:#0000;text-align:center;-webkit-background-clip:text;background-clip:text;font-family:Poppins,sans-serif;font-size:4rem;font-weight:800}#winner-score{color:#a0a0b8;margin-top:4px;font-size:1.2rem}#rankings{width:100%;max-width:560px;margin:30px 0 0;padding:0;list-style:none}#rankings li{background:#1a1a2e;border-radius:16px;align-items:center;gap:16px;margin-bottom:11px;padding:14px 22px;font-size:1.15rem;display:flex}.rank{background:#6c5ce7;border-radius:50%;flex-shrink:0;place-items:center;width:36px;height:36px;font-family:Poppins,sans-serif;font-weight:700;display:grid}#rankings li:first-child .rank{color:#0f0f1a;background:#00d2a8}.rank-name{flex:1;font-weight:600}.rank-points{color:#a0a0b8;font-family:Poppins,sans-serif;font-weight:700}</style>
+  <script type="module" crossorigin src="/assets/main-ajWL-9Mu.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/dist-DLUt_2_r.js">
+</head>
+<body>
+    <div class="brand">
+        <span class="logo"></span>
+        <h1>PocketPlay</h1>
+    </div>
+
+    <section id="view-lobby">
+        <p class="tagline">Your phone is the controller.</p>
+        <p class="hint">Scan the QR code to join</p>
+        <div id="qr-container">
+            <img id="qr-code" alt="QR Code" />
+        </div>
+        <div id="qr-url"></div>
+        <div id="status">Starting lobby...</div>
+        <div id="players"></div>
+        <button id="start-btn" class="primary-btn" disabled>START GAME</button>
+    </section>
+
+    <section id="view-game" hidden>
+        <div class="hud">
+            <span id="q-counter">Question 1 / 10</span>
+            <div class="timer"><div id="timer-fill"></div></div>
+            <span id="timer-num">20</span>
+        </div>
+        <h2 id="question-text"></h2>
+        <div id="reveal-banner" hidden></div>
+        <div id="answers">
+            <div class="answer" data-index="0">
+                <span class="badge badge-a">A</span>
+                <div class="answer-body">
+                    <span class="answer-text"></span>
+                    <span class="picks"></span>
+                </div>
+            </div>
+            <div class="answer" data-index="1">
+                <span class="badge badge-b">B</span>
+                <div class="answer-body">
+                    <span class="answer-text"></span>
+                    <span class="picks"></span>
+                </div>
+            </div>
+            <div class="answer" data-index="2">
+                <span class="badge badge-x">X</span>
+                <div class="answer-body">
+                    <span class="answer-text"></span>
+                    <span class="picks"></span>
+                </div>
+            </div>
+            <div class="answer" data-index="3">
+                <span class="badge badge-y">Y</span>
+                <div class="answer-body">
+                    <span class="answer-text"></span>
+                    <span class="picks"></span>
+                </div>
+            </div>
+        </div>
+        <div id="answered-count"></div>
+        <div id="scoreboard"></div>
+    </section>
+
+    <section id="view-final" hidden>
+        <p class="kicker">Winner</p>
+        <div id="winner-name"></div>
+        <div id="winner-score"></div>
+        <ol id="rankings"></ol>
+        <button id="again-btn" class="primary-btn">PLAY AGAIN</button>
+    </section>
+
+</body>
+</html>

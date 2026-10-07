@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>PocketPlay — Controller</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet" />
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            margin: 0;
+            min-height: 100dvh;
+            background: #1A1A2E;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            user-select: none;
+            overscroll-behavior: none;
+        }
+        section {
+            width: 100%;
+            max-width: 420px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        section[hidden] { display: none; }
+        #status {
+            color: #A0A0B8;
+            text-align: center;
+            min-height: 1.5em;
+            margin: 0 0 18px;
+            font-size: 1rem;
+        }
+        #status.error { color: #FF7675; }
+        #join-panel { gap: 14px; }
+        #name-input {
+            width: 100%;
+            background: #0F0F1A;
+            border: 2px solid #2E2E44;
+            border-radius: 16px;
+            color: #fff;
+            padding: 17px;
+            font-size: 1.15rem;
+            font-family: 'Inter', sans-serif;
+            text-align: center;
+        }
+        #name-input:focus {
+            outline: none;
+            border-color: #6C5CE7;
+        }
+        #join-btn {
+            width: 100%;
+            background: #00D2A8;
+            color: #0F0F1A;
+            border: none;
+            border-radius: 16px;
+            padding: 18px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        #join-btn:disabled { opacity: 0.4; }
+        #waiting-panel { text-align: center; }
+        .waiting-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin: 0 0 10px;
+        }
+        #waiting-text {
+            color: #A0A0B8;
+            margin: 0;
+            line-height: 1.5;
+        }
+        .controller-hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: #A0A0B8;
+            margin-bottom: 10px;
+        }
+        #c-timer {
+            font-size: 1.3rem;
+            color: #00D2A8;
+        }
+        #c-timer.urgent { color: #FF7675; }
+        #c-question {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.15rem;
+            text-align: center;
+            line-height: 1.4;
+            margin: 4px 0 14px;
+        }
+        .feedback {
+            text-align: center;
+            min-height: 1.6em;
+            margin: 0 0 14px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.05rem;
+        }
+        .feedback.accent { color: #A29BFE; }
+        .feedback.good { color: #00D2A8; }
+        .feedback.bad { color: #FF7675; }
+        .feedback.muted { color: #A0A0B8; font-weight: 600; font-size: 0.98rem; }
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            width: 100%;
+        }
+        .answer-btn {
+            background: #0F0F1A;
+            border: 2px solid #2E2E44;
+            border-radius: 20px;
+            padding: 16px 12px;
+            min-height: 112px;
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 11px;
+            font-family: 'Inter', sans-serif;
+            touch-action: none;
+            cursor: pointer;
+            transition: transform 0.05s, border-color 0.15s, background 0.15s, opacity 0.2s;
+        }
+        .answer-btn:not(:disabled):active { transform: scale(0.96); }
+        .answer-btn:disabled { cursor: default; }
+        .badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            display: grid;
+            place-items: center;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.15rem;
+        }
+        .badge-a { background: #6C5CE7; color: #fff; }
+        .badge-b { background: #00D2A8; color: #0F0F1A; }
+        .badge-x { background: #FD79A8; color: #fff; }
+        .badge-y { background: #FDCB6E; color: #0F0F1A; }
+        .answer-btn .answer-text {
+            font-size: 1rem;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.3;
+        }
+        .answer-btn.chosen {
+            border-color: #6C5CE7;
+            background: rgba(108, 92, 231, 0.2);
+        }
+        .answer-btn.correct {
+            border-color: #00D2A8;
+            background: rgba(0, 210, 168, 0.16);
+        }
+        .answer-btn.wrong {
+            border-color: #FF7675;
+            background: rgba(255, 118, 117, 0.14);
+        }
+        .answer-btn.dimmed { opacity: 0.4; }
+        #end-panel { text-align: center; }
+        .end-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 0 8px;
+        }
+        #end-text {
+            color: #A0A0B8;
+            margin: 0 0 18px;
+            line-height: 1.5;
+        }
+        #end-scores {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            width: 100%;
+        }
+        #end-scores li {
+            display: flex;
+            justify-content: space-between;
+            background: #0F0F1A;
+            padding: 12px 18px;
+            border-radius: 13px;
+            margin-bottom: 9px;
+            font-weight: 600;
+        }
+        #end-scores li span:last-child {
+            font-family: 'Poppins', sans-serif;
+            color: #00D2A8;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <section id="join-panel">
+        <p id="status">Connecting...</p>
+        <input id="name-input" type="text" placeholder="Your name" maxlength="12" autocomplete="off" />
+        <button id="join-btn">JOIN GAME</button>
+    </section>
+
+    <section id="waiting-panel" hidden>
+        <p class="waiting-title">Connected!</p>
+        <p id="waiting-text">Waiting for the host to start the game...</p>
+    </section>
+
+    <section id="game-panel" hidden>
+        <div class="controller-hud">
+            <span id="c-q-counter">Q1 / 10</span>
+            <span id="c-timer">20</span>
+        </div>
+        <p id="c-question"></p>
+        <p id="c-feedback" class="feedback"></p>
+        <div class="button-grid">
+            <button class="answer-btn" data-index="0">
+                <span class="badge badge-a">A</span>
+                <span class="answer-text"></span>
+            </button>
+            <button class="answer-btn" data-index="1">
+                <span class="badge badge-b">B</span>
+                <span class="answer-text"></span>
+            </button>
+            <button class="answer-btn" data-index="2">
+                <span class="badge badge-x">X</span>
+                <span class="answer-text"></span>
+            </button>
+            <button class="answer-btn" data-index="3">
+                <span class="badge badge-y">Y</span>
+                <span class="answer-text"></span>
+            </button>
+        </div>
+    </section>
+
+    <section id="end-panel" hidden>
+        <p class="end-title">Game over</p>
+        <p id="end-text"></p>
+        <ul id="end-scores"></ul>
+    </section>
+
+    <script type="module" src="/src/controller.js"></script>
+</body>
+</html>

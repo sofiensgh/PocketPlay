@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PocketPlay — Screen</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet" />
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            min-height: 100dvh;
+            background: #0F0F1A;
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 28px 24px 48px;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 6px;
+        }
+        .logo {
+            width: 26px;
+            height: 34px;
+            border: 3px solid #6C5CE7;
+            border-radius: 8px;
+            position: relative;
+        }
+        .logo::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 5px;
+            transform: translateX(-50%);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00D2A8;
+        }
+        .brand h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+        section {
+            width: 100%;
+            max-width: 1100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        section[hidden] { display: none; }
+        .tagline {
+            color: #A0A0B8;
+            font-size: 1.1rem;
+            margin: 4px 0 2px;
+        }
+        .hint {
+            color: #6C5CE7;
+            font-weight: 600;
+            margin: 8px 0 0;
+        }
+        #qr-container {
+            background: #fff;
+            padding: 18px;
+            border-radius: 22px;
+            margin-top: 22px;
+            box-shadow: 0 0 80px rgba(108, 92, 231, 0.35);
+        }
+        #qr-code {
+            display: block;
+            width: 260px;
+            height: 260px;
+        }
+        #qr-url {
+            margin-top: 12px;
+            color: #6C5CE7;
+            font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+            font-size: 0.95rem;
+            text-align: center;
+            word-break: break-all;
+            max-width: 420px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #status {
+            margin-top: 22px;
+            color: #A0A0B8;
+            font-size: 1.1rem;
+            text-align: center;
+            min-height: 1.5em;
+        }
+        #players {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 14px;
+            min-height: 40px;
+        }
+        .player-chip {
+            background: #6C5CE7;
+            padding: 9px 20px;
+            border-radius: 999px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+        .primary-btn {
+            margin-top: 26px;
+            background: #00D2A8;
+            color: #0F0F1A;
+            border: none;
+            border-radius: 16px;
+            padding: 18px 54px;
+            font-family: 'Poppins', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.08s;
+        }
+        .primary-btn:not(:disabled):active { transform: scale(0.97); }
+        .primary-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+        .hud {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            width: 100%;
+            margin-top: 10px;
+        }
+        #q-counter {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            color: #A0A0B8;
+            white-space: nowrap;
+        }
+        .timer {
+            flex: 1;
+            height: 12px;
+            background: #1A1A2E;
+            border-radius: 999px;
+            overflow: hidden;
+        }
+        #timer-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #6C5CE7, #00D2A8);
+            border-radius: 999px;
+            transition: width 1s linear;
+        }
+        #timer-fill.urgent {
+            background: #FF7675;
+        }
+        #timer-num {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            min-width: 2ch;
+            text-align: right;
+        }
+        #timer-num.urgent { color: #FF7675; }
+        #question-text {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 2.1rem;
+            text-align: center;
+            line-height: 1.3;
+            margin: 30px 0 0;
+            max-width: 900px;
+        }
+        #reveal-banner {
+            margin-top: 16px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.3rem;
+            color: #00D2A8;
+            text-align: center;
+            min-height: 1.6em;
+        }
+        #answers {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            width: 100%;
+            max-width: 900px;
+            margin-top: 26px;
+        }
+        .answer {
+            background: #1A1A2E;
+            border: 2px solid transparent;
+            border-radius: 20px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            transition: border-color 0.2s, background 0.2s, opacity 0.3s;
+        }
+        .badge {
+            flex-shrink: 0;
+            width: 46px;
+            height: 46px;
+            border-radius: 13px;
+            display: grid;
+            place-items: center;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 1.35rem;
+        }
+        .badge-a { background: #6C5CE7; color: #fff; }
+        .badge-b { background: #00D2A8; color: #0F0F1A; }
+        .badge-x { background: #FD79A8; color: #fff; }
+        .badge-y { background: #FDCB6E; color: #0F0F1A; }
+        .answer-body { min-width: 0; }
+        .answer-text {
+            display: block;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 1.4rem;
+            line-height: 1.25;
+        }
+        .picks {
+            display: block;
+            margin-top: 6px;
+            font-size: 0.95rem;
+            color: #A0A0B8;
+            min-height: 1.2em;
+        }
+        .answer.correct {
+            border-color: #00D2A8;
+            background: rgba(0, 210, 168, 0.12);
+        }
+        .answer.wrongish {
+            border-color: rgba(255, 118, 117, 0.7);
+            background: rgba(255, 118, 117, 0.08);
+        }
+        .answer.dimmed { opacity: 0.35; }
+        #answered-count {
+            margin-top: 22px;
+            color: #A0A0B8;
+            font-size: 1rem;
+            min-height: 1.4em;
+        }
+        #scoreboard {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            justify-content: center;
+            margin-top: 18px;
+        }
+        .score-row {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            background: #1A1A2E;
+            padding: 11px 20px;
+            border-radius: 15px;
+        }
+        .score-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #3A3A52;
+            flex-shrink: 0;
+        }
+        .score-dot.answered {
+            background: #00D2A8;
+            box-shadow: 0 0 9px #00D2A8;
+        }
+        .score-name { font-weight: 600; }
+        .score-value {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: #00D2A8;
+        }
+        .kicker {
+            color: #A0A0B8;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin: 30px 0 6px;
+        }
+        #winner-name {
+            font-family: 'Poppins', sans-serif;
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #6C5CE7, #00D2A8);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+        }
+        #winner-score {
+            color: #A0A0B8;
+            font-size: 1.2rem;
+            margin-top: 4px;
+        }
+        #rankings {
+            list-style: none;
+            padding: 0;
+            margin: 30px 0 0;
+            width: 100%;
+            max-width: 560px;
+        }
+        #rankings li {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: #1A1A2E;
+            padding: 14px 22px;
+            border-radius: 16px;
+            margin-bottom: 11px;
+            font-size: 1.15rem;
+        }
+        .rank {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #6C5CE7;
+            display: grid;
+            place-items: center;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        #rankings li:first-child .rank {
+            background: #00D2A8;
+            color: #0F0F1A;
+        }
+        .rank-name {
+            flex: 1;
+            font-weight: 600;
+        }
+        .rank-points {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: #A0A0B8;
+        }
+    </style>
+</head>
+<body>
+    <div class="brand">
+        <span class="logo"></span>
+        <h1>PocketPlay</h1>
+    </div>
+
+    <section id="view-lobby">
+        <p class="tagline">Your phone is the controller.</p>
+        <p class="hint">Scan the QR code to join</p>
+        <div id="qr-container">
+            <img id="qr-code" alt="QR Code" />
+        </div>
+        <div id="qr-url"></div>
+        <div id="status">Starting lobby...</div>
+        <div id="players"></div>
+        <button id="start-btn" class="primary-btn" disabled>START GAME</button>
+    </section>
+
+    <section id="view-game" hidden>
+        <div class="hud">
+            <span id="q-counter">Question 1 / 10</span>
+            <div class="timer"><div id="timer-fill"></div></div>
+            <span id="timer-num">20</span>
+        </div>
+        <h2 id="question-text"></h2>
+        <div id="reveal-banner" hidden></div>
+        <div id="answers">
+            <div class="answer" data-index="0">
+                <span class="badge badge-a">A</span>
+                <div class="answer-body">
+                    <span class="answer-text"></span>
+                    <span class="picks"></span>
+                </div>
+            </div>
+            <div class="answer" data-index="1">
+                <span class="badge badge-b">B</span>
+                <div class="answer-body">
+                    <span class="answer-text"></span>
+                    <span class="picks"></span>
+                </div>
+            </div>
+            <div class="answer" data-index="2">
+                <span class="badge badge-x">X</span>
+                <div class="answer-body">
+                    <span class="answer-text"></span>
+                    <span class="picks"></span>
+                </div>
+            </div>
+            <div class="answer" data-index="3">
+                <span class="badge badge-y">Y</span>
+                <div class="answer-body">
+                    <span class="answer-text"></span>
+                    <span class="picks"></span>
+                </div>
+            </div>
+        </div>
+        <div id="answered-count"></div>
+        <div id="scoreboard"></div>
+    </section>
+
+    <section id="view-final" hidden>
+        <p class="kicker">Winner</p>
+        <div id="winner-name"></div>
+        <div id="winner-score"></div>
+        <ol id="rankings"></ol>
+        <button id="again-btn" class="primary-btn">PLAY AGAIN</button>
+    </section>
+
+    <script type="module" src="/src/screen.js"></script>
+</body>
+</html>

@@ -1,0 +1,1 @@
+{"name":"pocketplay","version":"1.0.0","description":"Your phone is the controller.","type":"module","scripts":{"dev":"vite","build":"vite build","preview":"vite preview"},"keywords":["game","multiplayer","webrtc","party"],"author":"","license":"ISC","dependencies":{"touch-coop":"^4.0.3"},"devDependencies":{"vite":"^5.4.0"}}
