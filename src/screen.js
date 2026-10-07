@@ -1,5 +1,6 @@
 import { Match } from 'touch-coop';
 import { TriviaGame, BUTTON_TO_INDEX } from './game.js';
+import { diag, instrumentRTC, rtcSnapshot } from './diag.js';
 
 const el = (id) => document.getElementById(id);
 
@@ -234,6 +235,7 @@ function handleGameEvent(event) {
 
 async function init() {
     game = new TriviaGame({ onEvent: handleGameEvent });
+    instrumentRTC('host');
     match = new Match();
 
     el('start-btn').addEventListener('click', () => game.start());
@@ -245,6 +247,14 @@ async function init() {
     try {
         const controllerUrl = await buildControllerUrl();
         const { dataUrl, shareURL } = await match.createLobby(controllerUrl, handlePlayerEvent);
+        match._peer.on('connection', (conn) => {
+            diag('host-got-connection', { peer: conn.peer });
+            conn.on('open', () => diag('host-conn-open', { peer: conn.peer, rtc: rtcSnapshot() }));
+            conn.on('error', (err) => diag('host-conn-error', { peer: conn.peer, message: String(err && err.message || err), rtc: rtcSnapshot() }));
+            conn.on('close', () => diag('host-conn-close', { peer: conn.peer, rtc: rtcSnapshot() }));
+        });
+        match._peer.on('error', (err) => diag('host-peer-error', { message: String(err && err.message || err) }));
+        diag('lobby-created', { shareURL });
         el('qr-code').src = dataUrl;
         el('qr-url').textContent = shareURL;
         el('status').textContent = 'Lobby ready. Waiting for players...';

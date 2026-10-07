@@ -1,4 +1,5 @@
 import { Player } from 'touch-coop';
+import { diag, instrumentRTC, rtcSnapshot } from './diag.js';
 
 const LABELS = ['A', 'B', 'X', 'Y'];
 
@@ -167,14 +168,18 @@ async function join() {
     const name = el('name-input').value.trim() || 'Player';
     el('join-btn').disabled = true;
     setStatus('Connecting...');
+    diag('join-start', { name, url: location.href });
 
+    instrumentRTC('ctrl');
     try {
         player = new Player();
         // PeerJS silently drops signaling messages sent before its cloud socket
         // opens, so wait for our own peer ID first or the SDP offer never leaves.
         await player._ownIdPromise;
+        diag('peer-id-ready', { });
         await player.joinMatch(name);
     } catch (err) {
+        diag('join-failed', { message: String(err && err.message || err), rtc: rtcSnapshot() });
         el('join-btn').disabled = false;
         setStatus(`Could not connect: ${err.message || err}`, true);
         return;
@@ -194,6 +199,7 @@ async function join() {
     }
 
     joined = true;
+    diag('join-ok', { rtc: rtcSnapshot() });
     setStatus('');
     setPanel('waiting');
     el('waiting-text').textContent = 'Connected! Waiting for the host...';

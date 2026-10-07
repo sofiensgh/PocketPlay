@@ -1,4 +1,6 @@
+import fs from 'node:fs';
 import os from 'node:os';
+import path from 'node:path';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite';
 
@@ -34,8 +36,34 @@ function lanUrlPlugin() {
     };
 }
 
+const DIAG_LOG = path.join(os.tmpdir(), 'pocketplay-diag.log');
+
+function diagPlugin() {
+    const handler = (req, res, next) => {
+        if (req.url !== '/__diag' || req.method !== 'POST') return next();
+        let body = '';
+        req.on('data', (chunk) => { body += chunk; });
+        req.on('end', () => {
+            const line = `${new Date().toISOString()} ${body}\n`;
+            fs.appendFile(DIAG_LOG, line, () => {});
+            console.log(`[diag] ${body}`);
+            res.statusCode = 204;
+            res.end();
+        });
+    };
+    return {
+        name: 'pocketplay:diag',
+        configureServer(server) {
+            server.middlewares.use(handler);
+        },
+        configurePreviewServer(server) {
+            server.middlewares.use(handler);
+        },
+    };
+}
+
 export default defineConfig({
-    plugins: [lanUrlPlugin()],
+    plugins: [lanUrlPlugin(), diagPlugin()],
     server: {
         host: '0.0.0.0',
         port: 8080,
