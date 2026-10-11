@@ -1,6 +1,18 @@
 export const BUTTON_TO_INDEX = { A: 0, B: 1, X: 2, Y: 3 };
+export const INDEX_TO_BUTTON = ['A', 'B', 'X', 'Y'];
 
-export const POINTS_PER_CORRECT = 100;
+export const POINTS_FIRST = 100;
+export const POINTS_LATER = 50;
+
+// PocketPlay avatar palette (cyan, blue, indigo, purple, magenta, mint)
+export const AVATAR_COLORS = [
+    '#22D3EE',
+    '#3B82F6',
+    '#4F46E5',
+    '#A855F7',
+    '#C026D3',
+    '#2DD4BF',
+];
 
 export const QUESTIONS = [
     { q: 'Which planet is known as the "Red Planet"?', answers: ['Mars', 'Venus', 'Jupiter', 'Saturn'], correct: 0 },
@@ -38,7 +50,7 @@ export class TriviaGame {
     constructor({
         questions = QUESTIONS,
         roundLength = 10,
-        timeLimit = 20,
+        timeLimit = 15,
         revealDelay = 4000,
         onEvent = () => {},
     } = {}) {
@@ -47,26 +59,47 @@ export class TriviaGame {
         this.timeLimit = timeLimit;
         this.revealDelay = revealDelay;
         this.onEvent = onEvent;
-        this.players = new Map();
+        this.players = new Map(); // id -> { id, name, color, connected, score, answered, answerIndex }
         this.phase = 'lobby';
         this.queue = [];
         this.index = 0;
         this.current = null;
         this.remaining = 0;
         this.roundPoints = {};
+        this._first = null;
         this._tickTimer = null;
         this._advanceTimer = null;
     }
 
-    addPlayer(id, name) {
-        const existing = this.players.get(id);
+    /**
+     * A player joins or reconnects. If a disconnected player with the same
+     * name exists, their record (color + score) is transferred to the new
+     * id so reconnects are treated as the same player.
+     */
+    addPlayer(id, name, color) {
+        const cleanName = (name || 'Player').trim() || 'Player';
+        const existing = [ ...this.players.values() ].find(
+            (p) => !p.connected && p.name.toLowerCase() === cleanName.toLowerCase(),
+        );
         if (existing) {
-            if (name) existing.name = name;
+            this.players.delete(existing.id);
+            this.players.set(id, { ...existing, id, name: existing.name, connected: true });
+            this.onEvent({ type: 'players' });
+            return;
+        }
+        const current = this.players.get(id);
+        if (current) {
+            current.name = cleanName;
+            current.color = color || current.color;
+            current.connected = true;
+            this.onEvent({ type: 'players' });
             return;
         }
         this.players.set(id, {
             id,
-            name: name || 'Player',
+            name: cleanName,
+            color: color || AVATAR_COLORS[0],
+            connected: true,
             score: 0,
             answered: false,
             answerIndex: null,
@@ -74,8 +107,30 @@ export class TriviaGame {
         this.onEvent({ type: 'players' });
     }
 
+    setColor(id, color) {
+        const player = this.players.get(id);
+        if (player && color) {
+            player.color = color;
+            this.onEvent({ type: 'players' });
+        }
+    }
+
+    markDisconnected(id) {
+        const player = this.players.get(id);
+        if (player) {
+            player.connected = false;
+            this.onEvent({ type: 'players' });
+        }
+    }
+
     removePlayer(id) {
         if (this.players.delete(id)) this.onEvent({ type: 'players' });
+    }
+
+    connectedCount() {
+        let count = 0;
+        for (const player of this.players.values()) if (player.connected) count++;
+        return count;
     }
 
     start() {
@@ -93,6 +148,7 @@ export class TriviaGame {
         this.index = 0;
         this.current = null;
         this.roundPoints = {};
+        this._first = null;
         for (const player of this.players.values()) this._resetPlayer(player);
         this.onEvent({ type: 'reset' });
         this.onEvent({ type: 'players' });
@@ -106,7 +162,9 @@ export class TriviaGame {
         player.answered = true;
         player.answerIndex = answerIndex;
         const correct = answerIndex === this.current.correctIndex;
-        const points = correct ? POINTS_PER_CORRECT : 0;
+        // First correct answer gets +100, later correct answers +50, wrong 0.
+        const points = correct ? (this._first === null ? POINTS_FIRST : POINTS_LATER) : 0;
+        if (correct && this._first === null) this._first = playerId;
         player.score += points;
         this.roundPoints[playerId] = points;
         this.onEvent({
@@ -115,9 +173,9 @@ export class TriviaGame {
             correct,
             points,
             answeredCount: this.answeredCount(),
-            playerCount: this.players.size,
+            connectedCount: this.connectedCount(),
         });
-        if (this.answeredCount() === this.players.size) this._endQuestion();
+        if (this.answeredCount() === this.connectedCount()) this._endQuestion();
         return { correct, points };
     }
 
@@ -130,7 +188,7 @@ export class TriviaGame {
     rankings() {
         return [...this.players.values()]
             .sort((a, b) => b.score - a.score)
-            .map((player) => ({ id: player.id, name: player.name, score: player.score }));
+            .map((player) => ({ id: player.id, name: player.name, color: player.color, score: player.score, connected: player.connected }));
     }
 
     snapshot() {
@@ -160,6 +218,7 @@ export class TriviaGame {
             correctIndex: order.indexOf(base.correct),
         };
         this.roundPoints = {};
+        this._first = null;
         for (const player of this.players.values()) {
             player.answered = false;
             player.answerIndex = null;

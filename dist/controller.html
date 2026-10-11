@@ -4,26 +4,42 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
     <title>PocketPlay — Controller</title>
+    <link rel="icon" type="image/png" href="/logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Poppins:wght@600;700&display=swap" rel="stylesheet" />
-    <style>*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}body{color:#fff;-webkit-user-select:none;user-select:none;overscroll-behavior:none;background:#1a1a2e;flex-direction:column;justify-content:center;align-items:center;min-height:100dvh;margin:0;padding:20px;font-family:Inter,sans-serif;display:flex}section{flex-direction:column;align-items:center;width:100%;max-width:420px;display:flex}section[hidden]{display:none}#status{color:#a0a0b8;text-align:center;min-height:1.5em;margin:0 0 18px;font-size:1rem}#status.error{color:#ff7675}#join-panel{gap:14px}#name-input{color:#fff;text-align:center;background:#0f0f1a;border:2px solid #2e2e44;border-radius:16px;width:100%;padding:17px;font-family:Inter,sans-serif;font-size:1.15rem}#name-input:focus{border-color:#6c5ce7;outline:none}#join-btn{color:#0f0f1a;cursor:pointer;background:#00d2a8;border:none;border-radius:16px;width:100%;padding:18px;font-family:Poppins,sans-serif;font-size:1.2rem;font-weight:700}#join-btn:disabled{opacity:.4}#waiting-panel{text-align:center}.waiting-title{margin:0 0 10px;font-family:Poppins,sans-serif;font-size:1.25rem;font-weight:600}#waiting-text{color:#a0a0b8;margin:0;line-height:1.5}.controller-hud{color:#a0a0b8;justify-content:space-between;align-items:center;width:100%;margin-bottom:10px;font-family:Poppins,sans-serif;font-weight:600;display:flex}#c-timer{color:#00d2a8;font-size:1.3rem}#c-timer.urgent{color:#ff7675}#c-question{text-align:center;margin:4px 0 14px;font-family:Poppins,sans-serif;font-size:1.15rem;font-weight:600;line-height:1.4}.feedback{text-align:center;min-height:1.6em;margin:0 0 14px;font-family:Poppins,sans-serif;font-size:1.05rem;font-weight:700}.feedback.accent{color:#a29bfe}.feedback.good{color:#00d2a8}.feedback.bad{color:#ff7675}.feedback.muted{color:#a0a0b8;font-size:.98rem;font-weight:600}.button-grid{grid-template-columns:1fr 1fr;gap:12px;width:100%;display:grid}.answer-btn{color:#fff;touch-action:none;cursor:pointer;background:#0f0f1a;border:2px solid #2e2e44;border-radius:20px;flex-direction:column;justify-content:center;align-items:center;gap:11px;min-height:112px;padding:16px 12px;font-family:Inter,sans-serif;transition:transform 50ms,border-color .15s,background .15s,opacity .2s;display:flex}.answer-btn:not(:disabled):active{transform:scale(.96)}.answer-btn:disabled{cursor:default}.badge{border-radius:11px;place-items:center;width:38px;height:38px;font-family:Poppins,sans-serif;font-size:1.15rem;font-weight:700;display:grid}.badge-a{color:#fff;background:#6c5ce7}.badge-b{color:#0f0f1a;background:#00d2a8}.badge-x{color:#fff;background:#fd79a8}.badge-y{color:#0f0f1a;background:#fdcb6e}.answer-btn .answer-text{text-align:center;font-size:1rem;font-weight:600;line-height:1.3}.answer-btn.chosen{background:#6c5ce733;border-color:#6c5ce7}.answer-btn.correct{background:#00d2a829;border-color:#00d2a8}.answer-btn.wrong{background:#ff767524;border-color:#ff7675}.answer-btn.dimmed{opacity:.4}#end-panel{text-align:center}.end-title{margin:0 0 8px;font-family:Poppins,sans-serif;font-size:1.5rem;font-weight:700}#end-text{color:#a0a0b8;margin:0 0 18px;line-height:1.5}#end-scores{width:100%;margin:0;padding:0;list-style:none}#end-scores li{background:#0f0f1a;border-radius:13px;justify-content:space-between;margin-bottom:9px;padding:12px 18px;font-weight:600;display:flex}#end-scores li span:last-child{color:#00d2a8;font-family:Poppins,sans-serif;font-weight:700}</style>
-  <script type="module" crossorigin src="/assets/controller-BPjYvtUq.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/diag-BntA_CXG.js">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>:root{--bg-base:#0a0a14;--bg-elevated:#12121f;--bg-card:#1a1a2e;--gradient-start:#22d3ee;--gradient-mid:#4f46e5;--gradient-end:#a855f7;--text-primary:#fff;--text-muted:#94a3b8;--glow-blue:#3b82f680;--glow-purple:#8b5cf699;--border-subtle:#ffffff14;--gradient:linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-mid) 50%, var(--gradient-end) 100%)}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}.glow{filter:blur(120px);pointer-events:none;z-index:0;border-radius:50%;width:55vw;max-width:720px;height:55vw;max-height:720px;position:fixed}.glow-tl{background:#22d3ee26;animation:12s ease-in-out infinite alternate drift-a;top:-18vw;left:-18vw}.glow-br{background:#a855f72e;animation:12s ease-in-out infinite alternate drift-b;bottom:-20vw;right:-18vw}@keyframes drift-a{0%{transform:translate(0)scale(1)}to{transform:translate(6vw,5vw)scale(1.15)}}@keyframes drift-b{0%{transform:translate(0)scale(1.1)}to{transform:translate(-5vw,-6vw)scale(.95)}}.fade-up{opacity:0;animation:.6s forwards fade-up;transform:translateY(24px)}@keyframes fade-up{to{opacity:1;transform:translateY(0)}}body{background:var(--bg-base);min-height:100dvh;color:var(--text-primary);-webkit-user-select:none;user-select:none;overscroll-behavior:none;flex-direction:column;justify-content:center;align-items:center;margin:0;padding:20px;font-family:Poppins,sans-serif;font-weight:400;line-height:1.5;display:flex;overflow-x:hidden}section{z-index:1;flex-direction:column;align-items:center;width:100%;max-width:420px;display:flex;position:relative}section[hidden]{display:none}#join-panel{gap:14px}#join-panel .logo{object-fit:cover;width:88px;height:88px;filter:drop-shadow(0 0 32px var(--glow-purple));border-radius:22px;margin-bottom:4px;animation:3s ease-in-out infinite pulse}@keyframes pulse{0%,to{transform:scale(1)}50%{transform:scale(1.05)}}#name-input,#room-input{background:var(--bg-elevated);border:1px solid var(--border-subtle);width:100%;color:var(--text-primary);text-align:center;border-radius:16px;padding:17px;font-family:Poppins,sans-serif;font-size:1.15rem;transition:border-color .2s,box-shadow .2s}#name-input::placeholder{color:var(--text-muted)}#name-input:focus,#room-input:focus{border-color:var(--gradient-mid);box-shadow:0 0 0 4px var(--glow-purple);outline:none}#color-row{justify-content:center;gap:12px;margin:2px 0;display:flex}.swatch{cursor:pointer;border:3px solid #0000;border-radius:50%;width:44px;height:44px;transition:transform .12s,box-shadow .12s,border-color .12s}.swatch:hover{transform:scale(1.1)}.swatch.selected{border-color:var(--text-primary);box-shadow:0 0 18px var(--glow-purple);transform:scale(1.12)}.pick-label{color:var(--text-muted);margin:4px 0 0;font-size:.9rem;font-weight:600}#join-status{color:var(--text-muted);text-align:center;min-height:1.5em;margin:0 0 12px;font-size:1rem}#join-status.error{color:#ff7675}#join-btn,#rejoin-btn{background:var(--gradient);width:100%;color:var(--text-primary);letter-spacing:-.02em;cursor:pointer;background-size:200% 200%;border:none;border-radius:999px;padding:18px;font-family:Poppins,sans-serif;font-size:1.2rem;font-weight:800;transition:transform .15s,box-shadow .15s,background-position .4s;animation:6s ease-in-out infinite gradient-shift;box-shadow:0 8px 40px #8b5cf680}#join-btn:hover,#rejoin-btn:hover{transform:translateY(-2px);box-shadow:0 12px 48px #8b5cf6a6}#join-btn:active,#rejoin-btn:active{transform:scale(.98)}#join-btn:disabled{opacity:.5;cursor:default;box-shadow:none;animation:none}@keyframes gradient-shift{0%,to{background-position:0%}50%{background-position:100%}}#waiting-panel{text-align:center}.waiting-title{margin:0 0 10px;font-family:Poppins,sans-serif;font-size:1.25rem;font-weight:800}#waiting-name{letter-spacing:-.02em;margin:0 0 6px;font-size:1.6rem;font-weight:900}#waiting-dot{vertical-align:middle;border-radius:50%;width:14px;height:14px;margin-right:8px;display:inline-block}#waiting-text{color:var(--text-muted);margin:0;line-height:1.5}.dots:after{content:"";animation:1.4s steps(4,end) infinite dots}@keyframes dots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}#hostlost-panel{text-align:center}.hostlost-title{background:var(--gradient);color:#0000;-webkit-background-clip:text;background-clip:text;margin:0 0 8px;font-size:1.5rem;font-weight:800}#hostlost-text{color:var(--text-muted);margin:0 0 20px;line-height:1.5}#rejoin-btn{margin-top:0}.controller-hud{width:100%;color:var(--text-muted);justify-content:space-between;align-items:center;margin-bottom:10px;font-family:Poppins,sans-serif;font-weight:700;display:flex}#c-timer{background:var(--gradient);color:#0000;-webkit-background-clip:text;background-clip:text;font-size:1.3rem}#c-timer.urgent{color:#ff7675;background:0 0;-webkit-background-clip:initial;background-clip:initial}#c-question{text-align:center;margin:4px 0 14px;font-family:Poppins,sans-serif;font-size:1.15rem;font-weight:700;line-height:1.4}.feedback{text-align:center;min-height:1.6em;margin:0 0 14px;font-family:Poppins,sans-serif;font-size:1.05rem;font-weight:700}.feedback.accent{color:#a78bfa}.feedback.good{color:#22d3ee}.feedback.bad{color:#ff7675}.feedback.muted{color:var(--text-muted);font-size:.98rem;font-weight:600}.button-grid{grid-template-columns:1fr 1fr;gap:12px;width:100%;display:grid}.answer-btn{aspect-ratio:1;border:1px solid var(--border-subtle);color:var(--text-primary);touch-action:none;cursor:pointer;border-radius:24px;flex-direction:column;justify-content:center;align-items:center;gap:11px;padding:16px 12px;font-family:Poppins,sans-serif;transition:transform 50ms,filter .15s,box-shadow .15s,opacity .2s;display:flex}.answer-btn:first-child{background:linear-gradient(135deg,#22d3ee,#0e7490);box-shadow:0 6px 26px #22d3ee59}.answer-btn:nth-child(2){background:linear-gradient(135deg,#4f46e5,#1e3a8a);box-shadow:0 6px 26px #4f46e566}.answer-btn:nth-child(3){background:linear-gradient(135deg,#a855f7,#6b21a8);box-shadow:0 6px 26px #a855f766}.answer-btn:nth-child(4){background:linear-gradient(135deg,#c026d3,#701a75);box-shadow:0 6px 26px #c026d359}.answer-btn:not(:disabled):active{filter:brightness(1.25);box-shadow:0 0 0 4px var(--glow-purple), 0 6px 26px #8b5cf699;transform:scale(.96)}.answer-btn:disabled{cursor:default;filter:saturate(.7)}.badge{background:#ffffff29;border-radius:12px;place-items:center;width:40px;height:40px;font-size:1.2rem;font-weight:900;display:grid}.answer-btn .answer-text{text-align:center;font-size:1.05rem;font-weight:600;line-height:1.3}.answer-btn.chosen{box-shadow:0 0 0 3px var(--text-primary), 0 8px 32px #8b5cf699}.answer-btn.correct{box-shadow:0 0 0 3px #22d3ee,0 8px 32px #22d3ee99}.answer-btn.wrong{opacity:.85;box-shadow:0 0 0 3px #ff7675,0 8px 32px #ff767580}.answer-btn.dimmed{opacity:.4}#end-panel{text-align:center}.end-title{background:var(--gradient);color:#0000;-webkit-background-clip:text;background-clip:text;margin:0 0 8px;font-family:Poppins,sans-serif;font-size:1.5rem;font-weight:800}#end-text{color:var(--text-muted);margin:0 0 18px;line-height:1.5}#end-scores{width:100%;margin:0;padding:0;list-style:none}#end-scores li{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:13px;justify-content:space-between;margin-bottom:9px;padding:12px 18px;font-weight:600;display:flex}#end-scores li span:last-child{background:var(--gradient);color:#0000;-webkit-background-clip:text;background-clip:text;font-weight:800}</style>
+  <script type="module" crossorigin src="/assets/controller-BGmNV0-v.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-P2Xu9kJm.js">
+  <link rel="modulepreload" crossorigin href="/assets/diag-ClNyVyHp.js">
 </head>
 <body>
-    <section id="join-panel">
-        <p id="status">Connecting...</p>
-        <input id="name-input" type="text" placeholder="Your name" maxlength="12" autocomplete="off" />
+    <div class="glow glow-tl"></div>
+    <div class="glow glow-br"></div>
+
+    <section id="join-panel" class="fade-up">
+        <img class="logo" src="/logo.png" alt="PocketPlay" />
+        <p id="join-status">Ready to join!</p>
+        <input id="name-input" type="text" placeholder="Enter your name" maxlength="12" autocomplete="off" />
+        <p class="pick-label">Pick your color</p>
+        <div id="color-row"></div>
+        <input id="room-input" type="text" placeholder="Room code (e.g. 4F7K)" maxlength="4" autocomplete="off" spellcheck="false" />
         <button id="join-btn">JOIN GAME</button>
     </section>
 
-    <section id="waiting-panel" hidden>
+    <section id="waiting-panel" class="fade-up" hidden>
+        <div id="waiting-name"><span id="waiting-dot"></span><span id="waiting-label"></span></div>
         <p class="waiting-title">Connected!</p>
-        <p id="waiting-text">Waiting for the host to start the game...</p>
+        <p id="waiting-text">Waiting for the host to start the game<span class="dots"></span></p>
     </section>
 
-    <section id="game-panel" hidden>
+    <section id="hostlost-panel" class="fade-up" hidden>
+        <p class="hostlost-title">Host disconnected</p>
+        <p id="hostlost-text">The screen was reloaded or closed. Scan the QR code again to rejoin the game.</p>
+        <button id="rejoin-btn">REJOIN</button>
+    </section>
+
+    <section id="game-panel" class="fade-up" hidden>
         <div class="controller-hud">
             <span id="c-q-counter">Q1 / 10</span>
             <span id="c-timer">20</span>
@@ -32,26 +48,26 @@
         <p id="c-feedback" class="feedback"></p>
         <div class="button-grid">
             <button class="answer-btn" data-index="0">
-                <span class="badge badge-a">A</span>
+                <span class="badge">A</span>
                 <span class="answer-text"></span>
             </button>
             <button class="answer-btn" data-index="1">
-                <span class="badge badge-b">B</span>
+                <span class="badge">B</span>
                 <span class="answer-text"></span>
             </button>
             <button class="answer-btn" data-index="2">
-                <span class="badge badge-x">X</span>
+                <span class="badge">X</span>
                 <span class="answer-text"></span>
             </button>
             <button class="answer-btn" data-index="3">
-                <span class="badge badge-y">Y</span>
+                <span class="badge">Y</span>
                 <span class="answer-text"></span>
             </button>
         </div>
     </section>
 
-    <section id="end-panel" hidden>
-        <p class="end-title">Game over</p>
+    <section id="end-panel" class="fade-up" hidden>
+        <p id="end-title" class="end-title">Game over</p>
         <p id="end-text"></p>
         <ul id="end-scores"></ul>
     </section>

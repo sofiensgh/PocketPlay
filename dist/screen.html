@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PocketPlay — Screen</title>
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+    <style>:root{--bg-base:#0a0a14;--bg-elevated:#12121f;--bg-card:#1a1a2e;--gradient-start:#22d3ee;--gradient-mid:#4f46e5;--gradient-end:#a855f7;--text-primary:#fff;--text-muted:#94a3b8;--glow-blue:#3b82f680;--glow-purple:#8b5cf699;--border-subtle:#ffffff14;--gradient:linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-mid) 50%, var(--gradient-end) 100%)}*{box-sizing:border-box}body{background:var(--bg-base);min-height:100dvh;color:var(--text-primary);flex-direction:column;align-items:center;margin:0;padding:28px 24px 48px;font-family:Poppins,sans-serif;font-weight:400;line-height:1.6;display:flex;overflow-x:hidden}.glow{filter:blur(120px);pointer-events:none;z-index:0;border-radius:50%;width:55vw;max-width:720px;height:55vw;max-height:720px;position:fixed}.glow-tl{background:#22d3ee26;animation:12s ease-in-out infinite alternate drift-a;top:-18vw;left:-18vw}.glow-br{background:#a855f738;animation:12s ease-in-out infinite alternate drift-b;bottom:-20vw;right:-18vw}@keyframes drift-a{0%{transform:translate(0)scale(1)}to{transform:translate(6vw,5vw)scale(1.15)}}@keyframes drift-b{0%{transform:translate(0)scale(1.1)}to{transform:translate(-5vw,-6vw)scale(.95)}}.fade-up{opacity:0;animation:.6s forwards fade-up;transform:translateY(24px)}.fade-up:first-of-type{animation-delay:50ms}.fade-up:nth-of-type(2){animation-delay:.15s}.fade-up:nth-of-type(3){animation-delay:.25s}@keyframes fade-up{to{opacity:1;transform:translateY(0)}}.brand{z-index:1;align-items:center;gap:14px;margin-bottom:6px;display:flex;position:relative}.brand img{object-fit:cover;width:44px;height:44px;filter:drop-shadow(0 0 18px var(--glow-purple));border-radius:12px}.brand h1{letter-spacing:-.03em;margin:0;font-size:2rem;font-weight:800}.grad-text{background:var(--gradient);color:#0000;-webkit-background-clip:text;background-clip:text}section{z-index:1;flex-direction:column;align-items:center;width:100%;max-width:1100px;display:flex;position:relative}section[hidden]{display:none}.tagline{color:var(--text-muted);margin:4px 0 2px;font-size:1.1rem}.hint{background:var(--gradient);color:#0000;-webkit-background-clip:text;background-clip:text;margin:8px 0 0;font-weight:700}.hint-sub{color:var(--text-muted);margin:2px 0 0;font-size:.95rem}#qr-container{background:#fff;border-radius:22px;margin:0;padding:18px;box-shadow:0 0 80px #8b5cf673,0 0 24px #22d3ee40}#qr-code{width:260px;height:260px;display:block}.flip-card{perspective:1200px;cursor:pointer;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;margin-top:26px}.flip-inner{width:320px;max-width:86vw;height:430px;transform-style:preserve-3d;margin:0 auto;transition:transform .65s cubic-bezier(.4,.2,.2,1);position:relative}.flip-card.flipped .flip-inner{transform:rotateY(180deg)}.flip-face{backface-visibility:hidden;background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:26px;flex-direction:column;justify-content:center;align-items:center;padding:22px;display:flex;position:absolute;inset:0;box-shadow:0 0 70px #8b5cf666,0 18px 50px #00000059}.flip-front{text-align:center;gap:10px}.flip-back{justify-content:flex-start;gap:12px;transform:rotateY(180deg)}.flip-scan-icon{background:var(--gradient);width:92px;height:92px;box-shadow:0 10px 34px var(--glow-purple);border-radius:24px;place-items:center;margin-bottom:6px;display:grid}.flip-scan-icon svg{width:46px;height:46px}.flip-title{letter-spacing:-.02em;font-size:1.4rem;font-weight:800}.flip-sub{color:var(--text-muted);max-width:250px;font-size:.98rem;line-height:1.5}.flip-cta{color:var(--gradient-start);margin-top:8px;font-size:.95rem;font-weight:700}.flip-back-title{color:var(--text-muted);font-size:1.05rem;font-weight:700}.flip-flipback{color:var(--text-muted);font-size:.85rem}.flip-card:focus-visible{outline:2px solid var(--gradient-start);outline-offset:4px}#qr-url{color:var(--text-muted);text-align:center;word-break:break-all;max-width:420px;margin-top:12px;margin-left:auto;margin-right:auto;font-family:ui-monospace,Cascadia Mono,Consolas,monospace;font-size:.95rem}.clickable{cursor:pointer}#qr-link{border-radius:22px;display:block}#qr-link:hover,#qr-url:hover{text-decoration:none}#qr-url.clickable{display:block}#pc-join-btn.clickable{display:inline-block}.ghost-btn{color:var(--text-muted);border:1px solid var(--border-subtle);cursor:pointer;background:0 0;border-radius:999px;margin-top:10px;padding:10px 24px;font-family:Poppins,sans-serif;font-size:.95rem;font-weight:600;transition:color .15s,border-color .15s}.ghost-btn:hover{color:var(--text-primary);border-color:#8b5cf680}#join-hint{max-width:460px;margin:10px auto 0}#qr-container.clickable{transition:transform .15s,box-shadow .15s}#qr-container.clickable:hover{transform:translateY(-2px);box-shadow:0 0 90px #8b5cf699,0 0 28px #22d3ee59}#qr-container.clickable:active{transform:scale(.98)}#qr-url.clickable:hover{color:var(--text-primary)}#room-line{color:var(--text-muted);margin:16px 0 0;font-size:1.1rem}.room-code{letter-spacing:8px;background:var(--gradient);color:#0000;-webkit-background-clip:text;background-clip:text;font-family:ui-monospace,Cascadia Mono,Consolas,monospace;font-size:2.6rem;font-weight:800}#status{color:var(--text-muted);text-align:center;min-height:1.5em;margin-top:22px;font-size:1.1rem}#players{flex-wrap:wrap;justify-content:center;gap:12px;min-height:40px;margin-top:14px;display:flex}.player-chip{background:var(--gradient);color:var(--text-primary);box-shadow:0 4px 18px var(--glow-purple);border-radius:999px;align-items:center;gap:9px;padding:9px 22px;font-weight:700;transition:opacity .3s,transform .3s;animation:.4s both chip-in;display:inline-flex}.player-chip.offline{background:var(--bg-elevated);color:var(--text-muted);box-shadow:none;border:1px solid var(--border-subtle);opacity:.6}.player-dot{border-radius:50%;flex-shrink:0;width:12px;height:12px}@keyframes chip-in{0%{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}#start-btn:not(:disabled){animation:2s ease-in-out infinite pulse}.secondary-btn{color:var(--text-primary);border:1px solid var(--border-subtle);cursor:pointer;-webkit-backdrop-filter:blur(8px);background:#ffffff0d;border-radius:999px;margin-top:18px;padding:14px 34px;font-family:Poppins,sans-serif;font-size:1.05rem;font-weight:700;transition:transform .15s,border-color .15s,box-shadow .15s}.secondary-btn:hover{border-color:#8b5cf680;transform:translateY(-2px);box-shadow:0 8px 32px #8b5cf659}.secondary-btn:active{transform:scale(.98)}@keyframes pulse{0%,to{transform:scale(1);box-shadow:0 8px 40px #8b5cf680}50%{transform:scale(1.04);box-shadow:0 8px 56px #8b5cf6bf}}.score-row.offline{opacity:.5;filter:grayscale(.7)}.primary-btn{background:var(--gradient);color:var(--text-primary);letter-spacing:-.02em;cursor:pointer;background-size:200% 200%;border:none;border-radius:999px;margin-top:26px;padding:18px 54px;font-family:Poppins,sans-serif;font-size:1.25rem;font-weight:800;transition:transform .15s,box-shadow .15s;box-shadow:0 8px 40px #8b5cf680}.primary-btn:not(:disabled):hover{transform:translateY(-3px)scale(1.03);box-shadow:0 12px 48px #8b5cf6a6}.primary-btn:not(:disabled):active{transform:scale(.98)}.primary-btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}.hud{align-items:center;gap:18px;width:100%;margin-top:10px;display:flex}#q-counter{color:var(--text-muted);white-space:nowrap;font-weight:700}.timer{background:var(--bg-card);border-radius:999px;flex:1;height:12px;overflow:hidden}#timer-fill{background:var(--gradient);border-radius:999px;width:100%;height:100%;transition:width 1s linear}#timer-fill.urgent{background:#ff7675}#timer-num{text-align:right;min-width:2ch;font-size:1.5rem;font-weight:800}#timer-num.urgent{color:#ff7675}#question-text{letter-spacing:-.03em;text-align:center;max-width:900px;margin:30px 0 0;font-size:2.1rem;font-weight:800;line-height:1.3}#reveal-banner{background:var(--gradient);color:#0000;text-align:center;-webkit-background-clip:text;background-clip:text;min-height:1.6em;margin-top:16px;font-size:1.3rem;font-weight:700}#answers{grid-template-columns:1fr 1fr;gap:18px;width:100%;max-width:900px;margin-top:26px;display:grid}.answer{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:20px;align-items:center;gap:18px;padding:20px 24px;transition:border-color .2s,background .2s,opacity .3s;display:flex}.badge{border-radius:13px;flex-shrink:0;place-items:center;width:46px;height:46px;font-size:1.35rem;font-weight:800;display:grid}.badge-a{color:#062033;background:#22d3ee}.badge-b{color:#fff;background:#4f46e5}.badge-x{color:#fff;background:#a855f7}.badge-y{color:#fff;background:#c026d3}.answer-body{min-width:0}.answer-text{letter-spacing:-.02em;font-size:1.4rem;font-weight:700;line-height:1.25;display:block}.picks{color:var(--text-muted);min-height:1.2em;margin-top:6px;font-size:.95rem;display:block}.answer.correct{border-color:var(--gradient-start);background:#22d3ee1a}.answer.wrongish{background:#ff767514;border-color:#ff7675b3}.answer.dimmed{opacity:.35}#answered-count{color:var(--text-muted);min-height:1.4em;margin-top:22px;font-size:1rem}#scoreboard{flex-wrap:wrap;justify-content:center;gap:14px;margin-top:18px;display:flex}.score-row{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:15px;align-items:center;gap:11px;padding:11px 20px;display:flex}.score-dot{background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:50%;flex-shrink:0;width:10px;height:10px}.score-dot.answered{background:var(--gradient-start);box-shadow:0 0 9px var(--gradient-start)}.score-name{font-weight:600}.score-value{background:var(--gradient);color:#0000;-webkit-background-clip:text;background-clip:text;font-weight:800}.kicker{color:var(--text-muted);text-transform:uppercase;letter-spacing:4px;margin:30px 0 6px;font-size:.9rem;font-weight:600}#winner-name{letter-spacing:-.03em;background:var(--gradient);color:#0000;text-align:center;-webkit-background-clip:text;background-clip:text;font-size:4rem;font-weight:900}#winner-score{color:var(--text-muted);margin-top:4px;font-size:1.2rem}#rankings{width:100%;max-width:560px;margin:30px 0 0;padding:0;list-style:none}#rankings li{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:16px;align-items:center;gap:16px;margin-bottom:11px;padding:14px 22px;font-size:1.15rem;display:flex}.rank{background:var(--gradient);border-radius:50%;flex-shrink:0;place-items:center;width:36px;height:36px;font-weight:800;display:grid}.rank-name{flex:1;font-weight:600}.rank-points{color:var(--text-muted);font-weight:800}@media (width<=600px){#qr-code{width:220px;height:220px}.flip-inner{height:400px}.flip-title{font-size:1.2rem}#question-text{font-size:1.5rem}#answers{gap:12px}.answer{gap:12px;padding:14px 16px}.answer-text{font-size:1.1rem}#winner-name{font-size:2.6rem}}</style>
+  <script type="module" crossorigin src="/assets/screen-NZmWpw6A.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-P2Xu9kJm.js">
+  <link rel="modulepreload" crossorigin href="/assets/diag-ClNyVyHp.js">
+</head>
+<body>
+    <div class="glow glow-tl"></div>
+    <div class="glow glow-br"></div>
+
+    <div class="brand fade-up">
+        <img src="/logo.png" alt="PocketPlay logo" />
+        <h1>Pocket<span class="grad-text">Play</span></h1>
+    </div>
+
+    <section id="view-lobby" class="fade-up">
+        <p class="tagline">Your phone is the controller.</p>
+
+        <div id="qr-card" class="flip-card" role="button" tabindex="0" aria-label="Scan the QR code to join">
+            <div class="flip-inner">
+                <div class="flip-face flip-front">
+                    <div class="flip-scan-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="7" y="2.5" width="10" height="19" rx="2.5" />
+                            <path d="M10.5 18.5h3" />
+                            <path d="M3.5 7.5h2M3.5 11.5h2M3.5 15.5h2M18.5 7.5h2M18.5 11.5h2M18.5 15.5h2" />
+                        </svg>
+                    </div>
+                    <div class="flip-title">Scan the QR code</div>
+                    <div class="flip-sub">Point your phone camera at the screen to join the lobby</div>
+                    <div class="flip-cta">Tap to reveal the QR code</div>
+                </div>
+
+                <div class="flip-face flip-back">
+                    <div class="flip-back-title">Scan with your phone camera now</div>
+                    <a id="qr-link" class="clickable" target="_blank" rel="noopener" aria-label="Open the controller on this PC">
+                        <div id="qr-container">
+                            <img id="qr-code" alt="QR Code" />
+                        </div>
+                    </a>
+                    <a id="qr-url" class="clickable" target="_blank" rel="noopener"></a>
+                    <div class="flip-flipback">Tap to flip back</div>
+                </div>
+            </div>
+        </div>
+
+        <p id="room-line">or enter code: <span id="room-code" class="room-code"></span></p>
+        <div id="status">Starting lobby...</div>
+        <div id="players"></div>
+        <a id="pc-join-btn" class="secondary-btn clickable" target="_blank" rel="noopener" hidden>Join on this PC</a>
+        <button id="start-btn" class="primary-btn" disabled>START GAME</button>
+        <button id="copy-link-btn" class="ghost-btn" hidden>Copy join link</button>
+        <p id="join-hint" class="hint-sub" hidden>Waiting for a controller… scan the QR with your phone, or click the QR / "Join on this PC" to play from this computer.</p>
+    </section>
+
+    <section id="view-game" class="fade-up" hidden>
+        <div class="hud">
+            <span id="q-counter">Question 1 / 10</span>
+            <div class="timer"><div id="timer-fill"></div></div>
+            <span id="timer-num">20</span>
+        </div>
+        <h2 id="question-text"></h2>
+        <div id="reveal-banner" hidden></div>
+        <div id="answers">
+            <div class="answer" data-index="0">
+                <span class="badge badge-a">A</span>
+                <div class="answer-body">
+                    <span class="answer-text"></span>
+                    <span class="picks"></span>
+                </div>
+            </div>
+            <div class="answer" data-index="1">
+                <span class="badge badge-b">B</span>
+                <div class="answer-body">
+                    <span class="answer-text"></span>
+                    <span class="picks"></span>
+                </div>
+            </div>
+            <div class="answer" data-index="2">
+                <span class="badge badge-x">X</span>
+                <div class="answer-body">
+                    <span class="answer-text"></span>
+                    <span class="picks"></span>
+                </div>
+            </div>
+            <div class="answer" data-index="3">
+                <span class="badge badge-y">Y</span>
+                <div class="answer-body">
+                    <span class="answer-text"></span>
+                    <span class="picks"></span>
+                </div>
+            </div>
+        </div>
+        <div id="answered-count"></div>
+        <div id="scoreboard"></div>
+    </section>
+
+    <section id="view-final" class="fade-up" hidden>
+        <p class="kicker">Winner</p>
+        <div id="winner-name"></div>
+        <div id="winner-score"></div>
+        <ol id="rankings"></ol>
+        <button id="again-btn" class="primary-btn">PLAY AGAIN</button>
+    </section>
+
+</body>
+</html>
