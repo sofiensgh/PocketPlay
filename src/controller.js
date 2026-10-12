@@ -9,21 +9,17 @@ let myPlayerId = null;
 let myColor = AVATAR_COLORS[0];
 let hostPeerId = null;
 let joined = false;
-let phase = 'idle'; // idle | lobby | question | reveal | finished
+let phase = 'idle';
 let myAnswer = null;
 let timerId = null;
 let remaining = 0;
+let latestRoster = [];
+let isHost = false;
 
 function setPanel(name) {
     for (const panel of ['join', 'waiting', 'game', 'end', 'hostlost']) {
         el(`${panel}-panel`).hidden = panel !== name;
     }
-}
-
-function setStatus(message, isError = false) {
-    const status = el('status');
-    status.textContent = message;
-    status.classList.toggle('error', isError);
 }
 
 function setJoinStatus(message, isError = false) {
@@ -162,6 +158,27 @@ function handleHostMessage(message) {
     if (!message || typeof message !== 'object') return;
     if (message.type === 'identity') {
         myPlayerId = message.playerId;
+        if (message.color && message.color !== myColor) {
+            myColor = message.color;
+            el('waiting-dot').style.background = myColor;
+            renderSwatches();
+        }
+        if (message.hostId !== undefined) isHost = message.hostId === myPlayerId;
+        applyHostMode();
+        renderRoster();
+        return;
+    }
+    if (message.action === 'ROSTER') {
+        latestRoster = Array.isArray(message.players) ? message.players : [];
+        if (message.hostId !== undefined) isHost = message.hostId === myPlayerId;
+        const me = latestRoster.find((p) => p.id === myPlayerId);
+        if (me && me.color && me.color !== myColor) {
+            myColor = me.color;
+            el('waiting-dot').style.background = myColor;
+        }
+        renderSwatches();
+        applyHostMode();
+        renderRoster();
         return;
     }
     if (message.action === 'SET_VIEW') {
@@ -192,8 +209,6 @@ function handleHostMessage(message) {
 }
 
 function sendColor() {
-    // touch-coop's JOIN event carries only a name, so send the picked color
-    // as a follow-up COLOR event over the same data channel.
     try {
         player._dataConnection.send({
             action: 'COLOR',
@@ -227,7 +242,6 @@ function submitAnswer(index) {
     }
 }
 
-// Resolve a manual room code (controller.html?room=XXXX, no hostPeerId).
 async function resolveRoom(room) {
     try {
         const res = await fetch(`/__lobby?room=${encodeURIComponent(room)}`);
@@ -239,6 +253,37 @@ async function resolveRoom(room) {
         console.warn('Room lookup failed', err);
     }
     return null;
+}
+
+function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+// The public PeerJS signalling broker is flaky when several phones register at
+// the same instant, so a single connection attempt is not enough. We race every
+// attempt against a timeout and retry with jitter + backoff, which lets a second
+// (and third, ...) player join even if the broker briefly stalls.
+const PEER_ID_TIMEOUT = 6000;
+const CONNECT_TIMEOUT = 9000;
+const MAX_JOIN_ATTEMPTS = 4;
+
+async function attemptConnect(name) {
+    const candidate = new Player();
+    try {
+        await Promise.race([
+            candidate._ownIdPromise,
+            delay(PEER_ID_TIMEOUT).then(() => { throw new Error('Peer ID not assigned in time'); }),
+        ]);
+        diag('peer-id-ready', {});
+        await Promise.race([
+            candidate.joinMatch(name),
+            delay(CONNECT_TIMEOUT).then(() => { throw new Error('Connection timeout'); }),
+        ]);
+        return candidate;
+    } catch (err) {
+        try { candidate.destroy(); } catch (e) { /* already gone */ }
+        throw err;
+    }
 }
 
 async function join() {
@@ -265,17 +310,26 @@ async function join() {
     }
 
     instrumentRTC('ctrl');
-    try {
-        player = new Player();
-        // PeerJS silently drops signaling messages sent before its cloud socket
-        // opens, so wait for our own peer ID first or the SDP offer never leaves.
-        await player._ownIdPromise;
-        diag('peer-id-ready', {});
-        await player.joinMatch(name);
-    } catch (err) {
-        diag('join-failed', { message: String(err && err.message || err), rtc: rtcSnapshot() });
+    player = null;
+    let lastError = null;
+    for (let attempt = 1; attempt <= MAX_JOIN_ATTEMPTS; attempt++) {
+        if (attempt > 1) setJoinStatus(`Reconnecting… (attempt ${attempt} of ${MAX_JOIN_ATTEMPTS})`);
+        // Small random stagger so simultaneous scans don't all hit the broker at once.
+        await delay(Math.floor(Math.random() * 900));
+        try {
+            player = await attemptConnect(name);
+            lastError = null;
+            break;
+        } catch (err) {
+            lastError = err;
+            diag('join-attempt-failed', { attempt, message: String(err && err.message || err) });
+            if (attempt < MAX_JOIN_ATTEMPTS) await delay(500 * attempt);
+        }
+    }
+    if (!player) {
+        diag('join-failed', { message: String(lastError && lastError.message || lastError), rtc: rtcSnapshot() });
         el('join-btn').disabled = false;
-        setJoinStatus(`Could not connect: ${err.message || err}`, true);
+        setJoinStatus(`Could not connect: ${lastError ? (lastError.message || lastError) : 'unknown error'}`, true);
         return;
     }
 
@@ -309,17 +363,72 @@ function renderSwatches() {
     const row = el('color-row');
     row.innerHTML = '';
     AVATAR_COLORS.forEach((color) => {
+        const takenByOther = latestRoster.some(
+            (p) => p.connected && p.id !== myPlayerId && p.color === color,
+        );
         const swatch = document.createElement('button');
         swatch.type = 'button';
-        swatch.className = 'swatch' + (color === myColor ? ' selected' : '');
+        swatch.className = 'swatch' + (color === myColor ? ' selected' : '') + (takenByOther ? ' taken' : '');
         swatch.style.background = color;
-        swatch.setAttribute('aria-label', color);
+        swatch.setAttribute('aria-label', takenByOther ? `${color} (taken)` : color);
         swatch.addEventListener('click', () => {
             myColor = color;
+            if (joined && player && player._dataConnection && player._dataConnection.open) sendColor();
             renderSwatches();
         });
         row.appendChild(swatch);
     });
+}
+
+function renderRoster() {
+    const list = el('waiting-roster');
+    if (!list) return;
+    list.innerHTML = '';
+    for (const entry of latestRoster) {
+        const chip = document.createElement('div');
+        chip.className = 'roster-chip' + (entry.id === myPlayerId ? ' me' : '') + (entry.connected ? '' : ' offline');
+
+        const dot = document.createElement('span');
+        dot.className = 'roster-dot';
+        dot.style.background = entry.color;
+
+        const name = document.createElement('span');
+        name.textContent = entry.name + (entry.id === myPlayerId ? ' (you)' : '');
+
+        chip.append(dot, name);
+        list.appendChild(chip);
+    }
+    const count = el('waiting-count');
+    if (count) {
+        const online = latestRoster.filter((p) => p.connected).length;
+        count.textContent = online <= 1
+            ? 'Waiting for more players to join…'
+            : `${online} players in the lobby`;
+    }
+}
+
+// The first player to join becomes the host and drives the TV like a console
+// remote: the D-pad moves focus, A selects, B/Home quits to the dashboard.
+function applyHostMode() {
+    document.body.classList.toggle('is-host', isHost);
+    const pad = el('remote-pad');
+    if (pad) pad.hidden = !isHost;
+    const stick = document.querySelector('#waiting-panel .stick-idle');
+    if (stick) stick.hidden = isHost;
+    const title = document.querySelector('#waiting-panel .waiting-title');
+    if (title) title.textContent = isHost ? "You're the host 🎮" : 'Connected!';
+    const home = el('host-home');
+    if (home) home.hidden = !isHost;
+}
+
+function sendNav(code) {
+    if (!joined || !player || !player.isConnected) return;
+    navigator.vibrate?.(12);
+    try {
+        player.sendMove(code);
+    } catch (err) {
+        console.error('Failed to send nav input', err);
+    }
 }
 
 function init() {
@@ -352,7 +461,6 @@ function init() {
 
     document.querySelectorAll('.answer-btn').forEach((btn) => {
         const index = Number(btn.dataset.index);
-        // Touch first for lowest latency; pointer/mouse fallback guards double-fire.
         btn.addEventListener('touchstart', (e) => {
             e.preventDefault();
             submitAnswer(index);
@@ -365,6 +473,14 @@ function init() {
         });
     });
 
+    document.querySelectorAll('[data-nav]').forEach((btn) => {
+        const code = btn.dataset.nav;
+        btn.addEventListener('touchstart', (e) => { e.preventDefault(); sendNav(code); }, { passive: false });
+        btn.addEventListener('pointerdown', (e) => {
+            if (e.pointerType !== 'touch') { e.preventDefault(); sendNav(code); }
+        });
+    });
+
     el('rejoin-btn').addEventListener('click', () => {
         sessionStorage.setItem('pp-name', el('name-input').value.trim());
         sessionStorage.setItem('pp-color', myColor);
@@ -373,7 +489,6 @@ function init() {
 
     setPanel('join');
 
-    // Debug/test handle (used by the headless smoke test).
     window.__ppC = { get player() { return player; } };
 }
 

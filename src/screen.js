@@ -64,6 +64,39 @@ function broadcast(payload) {
     }
 }
 
+// Keep every phone's "who's here" list in sync (lobby roster).
+function broadcastRoster() {
+    broadcast({ action: 'ROSTER', players: game.roster(), hostId: game.hostId });
+}
+
+// Navigation buttons the host phone's gamepad can send. Trivia answer buttons
+// (A/B/X/Y) are handled by the game; everything else drives the TV UI.
+const NAV_KEYS = { LEFT: 'ArrowLeft', RIGHT: 'ArrowRight', UP: 'ArrowLeft', DOWN: 'ArrowRight' };
+
+function pressKey(key) {
+    const target = document.body || document;
+    target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
+}
+
+function backToDashboard() {
+    if (el('view-lobby').hidden === false) return; // already on the dashboard
+    game.reset();
+}
+
+function handleMove(playerId, button) {
+    const isAnswer = Object.prototype.hasOwnProperty.call(BUTTON_TO_INDEX, button);
+    if (game.phase === 'question' && isAnswer) {
+        game.submitAnswer(playerId, BUTTON_TO_INDEX[button]);
+        return;
+    }
+    // Only the host remote can drive the TV dashboard.
+    if (playerId !== game.hostId) return;
+    if (NAV_KEYS[button]) pressKey(NAV_KEYS[button]);
+    else if (button === 'A') pressKey('Enter');
+    else if (button === 'B' || button === 'HOME' || button === 'START') backToDashboard();
+    else if (button === 'FULLSCREEN') el('fullscreen-btn')?.click();
+}
+
 function showView(name) {
     for (const view of ['lobby', 'game', 'final']) {
         el(`view-${view}`).hidden = view !== name;
@@ -72,12 +105,19 @@ function showView(name) {
 
 function handlePlayerEvent(event) {
     switch (event.action) {
-        case 'JOIN':
+        case 'JOIN': {
             game.addPlayer(event.playerId, event.playerName);
-            sendTo(event.playerId, { type: 'identity', playerId: event.playerId });
+            const player = game.players.get(event.playerId);
+            sendTo(event.playerId, {
+                type: 'identity',
+                playerId: event.playerId,
+                color: player ? player.color : undefined,
+                hostId: game.hostId,
+            });
             sendTo(event.playerId, snapshotMessage());
             el('status').textContent = `${event.playerName || 'Player'} joined!`;
             break;
+        }
         case 'COLOR':
             game.setColor(event.playerId, event.color);
             break;
@@ -85,7 +125,7 @@ function handlePlayerEvent(event) {
             game.markDisconnected(event.playerId);
             break;
         case 'MOVE':
-            game.submitAnswer(event.playerId, BUTTON_TO_INDEX[event.button]);
+            handleMove(event.playerId, event.button);
             break;
     }
 }
@@ -119,8 +159,9 @@ function renderPlayers() {
     const chips = el('players');
     chips.innerHTML = '';
     for (const player of players) {
+        const isHost = player.id === game.hostId;
         const chip = document.createElement('div');
-        chip.className = 'player-chip' + (player.connected ? '' : ' offline');
+        chip.className = 'player-chip' + (player.connected ? '' : ' offline') + (isHost ? ' host' : '');
 
         const dot = document.createElement('span');
         dot.className = 'player-dot';
@@ -130,6 +171,12 @@ function renderPlayers() {
         name.textContent = player.connected ? player.name : `${player.name} (disconnected)`;
 
         chip.append(dot, name);
+        if (isHost) {
+            const badge = document.createElement('span');
+            badge.className = 'host-badge';
+            badge.textContent = '🎮 HOST';
+            chip.appendChild(badge);
+        }
         chips.appendChild(chip);
     }
     el('start-btn').disabled = game.connectedCount() === 0;
@@ -272,6 +319,7 @@ function handleGameEvent(event) {
     switch (event.type) {
         case 'players':
             renderPlayers();
+            broadcastRoster();
             break;
         case 'question':
             renderQuestion(event);

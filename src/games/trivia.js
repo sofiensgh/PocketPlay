@@ -60,6 +60,7 @@ export class TriviaGame {
         this.revealDelay = revealDelay;
         this.onEvent = onEvent;
         this.players = new Map(); // id -> { id, name, color, connected, score, answered, answerIndex }
+        this.hostId = null; // the first player to join acts as the "host" remote
         this.phase = 'lobby';
         this.queue = [];
         this.index = 0;
@@ -83,14 +84,21 @@ export class TriviaGame {
         );
         if (existing) {
             this.players.delete(existing.id);
-            this.players.set(id, { ...existing, id, name: existing.name, connected: true });
+            this.players.set(id, {
+                ...existing,
+                id,
+                name: existing.name,
+                connected: true,
+                color: this._pickColor(existing.color, id),
+            });
+            if (this.hostId === existing.id) this.hostId = id;
             this.onEvent({ type: 'players' });
             return;
         }
         const current = this.players.get(id);
         if (current) {
             current.name = cleanName;
-            current.color = color || current.color;
+            current.color = this._pickColor(color || current.color, id);
             current.connected = true;
             this.onEvent({ type: 'players' });
             return;
@@ -98,33 +106,74 @@ export class TriviaGame {
         this.players.set(id, {
             id,
             name: cleanName,
-            color: color || AVATAR_COLORS[0],
+            color: this._pickColor(color, id),
             connected: true,
             score: 0,
             answered: false,
             answerIndex: null,
         });
+        if (!this.hostId) this.hostId = id;
         this.onEvent({ type: 'players' });
+    }
+
+    // The host remote is the first player to join; if they drop, hand the
+    // remote to the next longest-connected player so navigation keeps working.
+    _promoteHost() {
+        for (const player of this.players.values()) {
+            if (player.connected) {
+                this.hostId = player.id;
+                return;
+            }
+        }
+        this.hostId = null;
+    }
+
+    /**
+     * Colours are cosmetic but help everyone tell players apart, so keep them
+     * distinct: honour the preferred colour when it is free, otherwise hand out
+     * the first unused palette entry (falling back once the palette runs out).
+     */
+    _pickColor(preferred, forId) {
+        const used = new Set();
+        for (const [pid, player] of this.players) {
+            if (pid !== forId && player.connected && player.color) used.add(player.color);
+        }
+        if (preferred && !used.has(preferred)) return preferred;
+        const free = AVATAR_COLORS.find((color) => !used.has(color));
+        return free || preferred || AVATAR_COLORS[0];
     }
 
     setColor(id, color) {
         const player = this.players.get(id);
         if (player && color) {
-            player.color = color;
+            player.color = this._pickColor(color, id);
             this.onEvent({ type: 'players' });
         }
+    }
+
+    roster() {
+        return [...this.players.values()].map((player) => ({
+            id: player.id,
+            name: player.name,
+            color: player.color,
+            connected: player.connected,
+        }));
     }
 
     markDisconnected(id) {
         const player = this.players.get(id);
         if (player) {
             player.connected = false;
+            if (this.hostId === id) this._promoteHost();
             this.onEvent({ type: 'players' });
         }
     }
 
     removePlayer(id) {
-        if (this.players.delete(id)) this.onEvent({ type: 'players' });
+        if (this.players.delete(id)) {
+            if (this.hostId === id) this._promoteHost();
+            this.onEvent({ type: 'players' });
+        }
     }
 
     connectedCount() {
