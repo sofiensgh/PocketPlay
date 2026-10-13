@@ -669,10 +669,73 @@
             .glow-tl, .glow-br, .stick-idle::before, .stick-idle::after,
             .brand img, #join-btn, #rejoin-btn, #c-timer.urgent { animation: none !important; }
         }
+        :root {
+            --bg-base: #070912;
+            --bg-elevated: #101827;
+            --bg-card: #131b2b;
+            --gradient-start: #81f7e2;
+            --gradient-mid: #48b5ff;
+            --gradient-end: #9a7bff;
+            --text-muted: #a0abc0;
+            --glow-purple: rgba(72, 181, 255, .38);
+            --border-subtle: rgba(180, 204, 255, .13);
+            --gradient: linear-gradient(110deg, #a3ffed 0%, #61caff 48%, #a88aff 100%);
+        }
+        body {
+            background:
+                radial-gradient(ellipse at 78% 16%, rgba(58, 109, 184, .18), transparent 34%),
+                radial-gradient(ellipse at 14% 82%, rgba(50, 176, 157, .12), transparent 34%),
+                var(--bg-base);
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: .13;
+            background-image: linear-gradient(rgba(180, 204, 255, .04) 1px, transparent 1px), linear-gradient(90deg, rgba(180, 204, 255, .04) 1px, transparent 1px);
+            background-size: 52px 52px;
+            mask-image: linear-gradient(to bottom, black, transparent 82%);
+        }
+        .glow-tl { background: rgba(67, 197, 204, .13); }
+        .glow-br { background: rgba(92, 103, 225, .16); }
+        section {
+            border-radius: 24px;
+            border-color: rgba(165, 205, 255, .16);
+            background: linear-gradient(155deg, rgba(21, 30, 48, .96), rgba(10, 15, 27, .97));
+            box-shadow: 0 34px 90px rgba(0, 0, 0, .54), inset 0 1px 0 rgba(255, 255, 255, .07);
+        }
+        .brand img { filter: drop-shadow(0 0 24px rgba(92, 205, 255, .42)); }
+        #name-input, #room-input {
+            border-radius: 12px;
+            background: rgba(7, 11, 21, .78);
+        }
+        #name-input:focus, #room-input:focus { border-color: #69d9ee; box-shadow: 0 0 0 3px rgba(72, 181, 255, .18); }
+        #join-btn, #rejoin-btn {
+            border-radius: 12px;
+            color: #071016;
+            box-shadow: 0 10px 34px rgba(72, 181, 255, .2), inset 0 1px 0 rgba(255, 255, 255, .55);
+        }
+        #join-btn:hover, #rejoin-btn:hover { box-shadow: 0 14px 40px rgba(72, 181, 255, .3), inset 0 1px 0 rgba(255, 255, 255, .55); }
+        .stick-idle { background: radial-gradient(circle at 35% 30%, #28364d, #101827 75%); }
+        .stick-idle::before { border-color: rgba(129, 247, 226, .34); }
+        .host-home { border-color: rgba(113, 210, 240, .42); background: linear-gradient(120deg, rgba(72, 181, 255, .2), rgba(154, 123, 255, .2)); }
+        #again-btn { color: #071016; }
+        button:focus-visible, input:focus-visible { outline: 2px solid #a3ffed; outline-offset: 3px; }
+        @media (max-height: 680px) {
+            body { justify-content: flex-start; padding-top: 14px; padding-bottom: 14px; }
+            section { padding-top: 22px; padding-bottom: 22px; }
+        }
+        @media (max-width: 360px) {
+            #color-row { gap: 7px; }
+            .swatch { width: 34px; height: 34px; }
+        }
     </style>
-  <script type="module" crossorigin src="/assets/controller-DoGIlYz5.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <script type="module" crossorigin src="/assets/controller-B9pyr9RO.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/console-theme-C3qoERNF.js">
   <link rel="modulepreload" crossorigin href="/assets/diag-CnpKLvL5.js">
+  <link rel="stylesheet" crossorigin href="/assets/console-theme-BpUr8PQy.css">
 </head>
 <body>
     <div class="glow glow-tl"></div>

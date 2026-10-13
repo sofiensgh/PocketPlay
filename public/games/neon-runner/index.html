@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neon Runner 3D — PocketPlay</title>
+    <style>
+        :root {
+            --bg-base: #0A0A14;
+            --text-primary: #FFFFFF;
+            --text-muted: #94A3B8;
+            --gradient: linear-gradient(135deg, #22D3EE 0%, #4F46E5 50%, #A855F7 100%);
+        }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        html, body { height: 100%; margin: 0; }
+        body {
+            background: var(--bg-base);
+            color: var(--text-primary);
+            font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+            overflow: hidden;
+        }
+        #stage { position: fixed; inset: 0; }
+        canvas { display: block; }
+
+        .hud {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 22px;
+            pointer-events: none;
+            z-index: 5;
+        }
+        .hud .stat {
+            display: inline-flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .hud .label {
+            font-size: 0.62rem;
+            font-weight: 800;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+        .hud .value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .hud .value.plain { background: none; -webkit-text-fill-color: #fff; color: #fff; }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            text-align: center;
+            padding: 24px;
+            background: radial-gradient(ellipse at center, rgba(10,10,20,0.55) 0%, rgba(10,10,20,0.9) 75%);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            transition: opacity 0.25s ease;
+        }
+        .overlay[hidden] { display: none; }
+        .overlay h1 {
+            margin: 0;
+            font-size: clamp(2.4rem, 7vw, 4.5rem);
+            font-weight: 900;
+            letter-spacing: -0.035em;
+            line-height: 1;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .overlay p { margin: 0; color: var(--text-muted); font-size: 1rem; max-width: 460px; line-height: 1.55; }
+        .keys {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 6px;
+        }
+        .key {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .key b {
+            font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace;
+            color: #fff;
+            font-weight: 800;
+        }
+        .go-btn {
+            margin-top: 10px;
+            background: var(--gradient);
+            color: #fff;
+            border: none;
+            border-radius: 999px;
+            padding: 15px 42px;
+            font-family: inherit;
+            font-size: 1.05rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 14px 40px -12px rgba(139, 92, 246, 0.85);
+            transition: transform 0.15s ease;
+        }
+        .go-btn:hover { transform: translateY(-2px); }
+        .overlay .final-score {
+            font-size: clamp(3rem, 9vw, 6rem);
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            color: #fff;
+            line-height: 1;
+        }
+        .flash {
+            position: fixed;
+            inset: 0;
+            z-index: 20;
+            pointer-events: none;
+            background: rgba(255, 80, 80, 0.35);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .flash.on { opacity: 1; transition: opacity 0.05s ease; }
+        @media (prefers-reduced-motion: reduce) {
+            .overlay, .go-btn, .flash { transition-duration: 0.01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="stage"></div>
+
+    <div class="hud">
+        <div class="stat">
+            <span class="label">Score</span>
+            <span class="value" id="hud-score">0</span>
+        </div>
+        <div class="stat" style="text-align:right">
+            <span class="label">Speed</span>
+            <span class="value plain" id="hud-speed">1.0x</span>
+        </div>
+    </div>
+
+    <div class="overlay" id="overlay-ready">
+        <h1>Neon Runner</h1>
+        <p>Weave through the neon grid. Survive as long as you can — it only gets faster.</p>
+        <div class="keys">
+            <span class="key"><b>← →</b> Switch lane</span>
+            <span class="key"><b>↑</b> Jump</span>
+            <span class="key"><b>↓</b> Duck</span>
+        </div>
+        <button class="go-btn" id="start-btn">▶ Start</button>
+    </div>
+
+    <div class="overlay" id="overlay-over" hidden>
+        <h1 style="background:none;-webkit-text-fill-color:#fff;color:#fff">Crashed</h1>
+        <span class="label" style="font-size:0.62rem;font-weight:800;letter-spacing:0.24em;text-transform:uppercase;color:#94A3B8">Final score</span>
+        <div class="final-score" id="final-score">0</div>
+        <p id="best-line">Best: 0</p>
+        <button class="go-btn" id="retry-btn">↻ Try again</button>
+    </div>
+
+    <div class="flash" id="flash"></div>
+
+    <script type="importmap">
+        { "imports": { "three": "/games/vendor/three.module.min.js" } }
+    </script>
+    <script type="module">
+        import * as THREE from 'three';
+
+        // ------------------------------------------------------------------
+        // Neon Runner — a small original 3D game built on Three.js (MIT).
+        // The TV drives it either from a real keyboard or from PocketPlay
+        // controller messages: { type: 'pp-key', key: 'ArrowLeft' }.
+        // ------------------------------------------------------------------
+        const LANES = [-2.2, 0, 2.2];
+        const BASE_SPEED = 14;      // world units per second
+        const SPAWN_GAP = 13;       // distance between obstacle groups
+        const GRAVITY = -34;
+        const JUMP_V = 12;
+        const DUCK_FACTOR = 0.5;
+
+        const stage = document.getElementById('stage');
+        const hudScore = document.getElementById('hud-score');
+        const hudSpeed = document.getElementById('hud-speed');
+        const overlayReady = document.getElementById('overlay-ready');
+        const overlayOver = document.getElementById('overlay-over');
+        const finalScoreEl = document.getElementById('final-score');
+        const bestLine = document.getElementById('best-line');
+        const flashEl = document.getElementById('flash');
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = false;
+        stage.appendChild(renderer.domElement);
+
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x0a0a14);
+        scene.fog = new THREE.Fog(0x0a0a14, 26, 68);
+
+        const camera = new THREE.PerspectiveCamera(66, window.innerWidth / window.innerHeight, 0.1, 200);
+        camera.position.set(0, 5.4, 9.2);
+        camera.lookAt(0, 0.6, -8);
+
+        // Lights -----------------------------------------------------------------
+        scene.add(new THREE.HemisphereLight(0x93c5fd, 0x0a0a14, 0.9));
+        const key = new THREE.DirectionalLight(0xffffff, 1.15);
+        key.position.set(4, 10, 6);
+        scene.add(key);
+        const rim = new THREE.PointLight(0xa855f7, 2.2, 60);
+        rim.position.set(-6, 4, -10);
+        scene.add(rim);
+
+        // Ground grid (animated to fake forward motion) ---------------------------
+        function makeGridTexture() {
+            const size = 512;
+            const cv = document.createElement('canvas');
+            cv.width = cv.height = size;
+            const ctx = cv.getContext('2d');
+            ctx.fillStyle = '#0d0d1c';
+            ctx.fillRect(0, 0, size, size);
+            ctx.strokeStyle = 'rgba(34,211,238,0.55)';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(0, 0, size, size);
+            ctx.strokeStyle = 'rgba(79,70,229,0.35)';
+            ctx.lineWidth = 1;
+            for (let i = 1; i < 4; i++) {
+                const p = (size / 4) * i;
+                ctx.beginPath(); ctx.moveTo(p, 0); ctx.lineTo(p, size); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(0, p); ctx.lineTo(size, p); ctx.stroke();
+            }
+            const tex = new THREE.CanvasTexture(cv);
+            tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+            tex.repeat.set(3, 40);
+            tex.anisotropy = 4;
+            return tex;
+        }
+
+        const gridTex = makeGridTexture();
+        const ground = new THREE.Mesh(
+            new THREE.PlaneGeometry(16, 160),
+            new THREE.MeshStandardMaterial({ map: gridTex, emissive: 0x111133, emissiveIntensity: 0.6, roughness: 1, metalness: 0 }),
+        );
+        ground.rotation.x = -Math.PI / 2;
+        ground.position.z = -60;
+        scene.add(ground);
+
+        // Player -----------------------------------------------------------------
+        const player = new THREE.Mesh(
+            new THREE.BoxGeometry(1, 1, 1),
+            new THREE.MeshStandardMaterial({ color: 0x22d3ee, emissive: 0x22d3ee, emissiveIntensity: 0.9, roughness: 0.3, metalness: 0.2 }),
+        );
+        player.position.set(0, 0.5, 0);
+        scene.add(player);
+        const playerGlow = new THREE.PointLight(0x22d3ee, 2.4, 14);
+        player.add(playerGlow);
+
+        // Obstacles --------------------------------------------------------------
+        const obstacles = [];
+        const obstacleGeo = new THREE.BoxGeometry(1.7, 1.7, 1.7);
+
+        function addObstacle(lane, z, kind) {
+            const color = kind === 'tall' ? 0xa855f7 : 0x4f46e5;
+            const mesh = new THREE.Mesh(
+                obstacleGeo,
+                new THREE.MeshStandardMaterial({ color, emissive: color, emissiveIntensity: 0.7, roughness: 0.4, metalness: 0.3 }),
+            );
+            const h = kind === 'tall' ? 2.4 : 1.7;
+            mesh.scale.set(1, h / 1.7, 1);
+            mesh.position.set(LANES[lane], (h / 2), z);
+            scene.add(mesh);
+            const entry = { mesh, lane, height: h, kind };
+            obstacles.push(entry);
+            return entry;
+        }
+
+        function clearObstacles() {
+            for (const o of obstacles) {
+                scene.remove(o.mesh);
+                o.mesh.material.dispose();
+            }
+            obstacles.length = 0;
+        }
+
+        // Game state -------------------------------------------------------------
+        let state = 'ready';        // ready | playing | over
+        let score = 0;
+        let speed = BASE_SPEED;
+        let playerLane = 1;
+        let targetX = LANES[1];
+        let playerY = 0;            // feet height above the ground
+        let velY = 0;
+        let jumping = false;
+        let ducking = false;
+        let nextSpawnZ = -34;
+        let best = Number(localStorage.getItem('pp-neon-best') || 0);
+        let lastT = performance.now();
+
+        function reset() {
+            clearObstacles();
+            score = 0;
+            speed = BASE_SPEED;
+            playerLane = 1;
+            targetX = LANES[1];
+            playerY = 0;
+            velY = 0;
+            jumping = false;
+            ducking = false;
+            nextSpawnZ = -34;
+            player.position.set(0, 0.5, 0);
+            player.scale.set(1, 1, 1);
+            hudScore.textContent = '0';
+            hudSpeed.textContent = '1.0x';
+            overlayReady.hidden = false;
+            overlayOver.hidden = true;
+            state = 'ready';
+            lastT = performance.now();
+        }
+
+        function start() {
+            reset();
+            overlayReady.hidden = true;
+            overlayOver.hidden = true;
+            state = 'playing';
+            lastT = performance.now();
+        }
+
+        function gameOver() {
+            state = 'over';
+            flashEl.classList.add('on');
+            setTimeout(() => flashEl.classList.remove('on'), 120);
+            if (score > best) {
+                best = score;
+                localStorage.setItem('pp-neon-best', String(best));
+            }
+            finalScoreEl.textContent = String(score);
+            bestLine.textContent = `Best: ${best}`;
+            overlayOver.hidden = false;
+        }
+
+        // Input ------------------------------------------------------------------
+        function moveLane(dir) {
+            playerLane = Math.max(0, Math.min(LANES.length - 1, playerLane + dir));
+            targetX = LANES[playerLane];
+        }
+        function doJump() {
+            if (!jumping) { jumping = true; velY = JUMP_V; ducking = false; }
+        }
+        function doDuck() {
+            ducking = true;
+            if (jumping) velY = Math.min(velY, -6);
+        }
+
+        function handleKey(k) {
+            if (state === 'ready' || state === 'over') {
+                if (k === 'ArrowUp' || k === 'Enter' || k === ' ' || k === 'Spacebar' || k === 'a' || k === 'A') start();
+                return;
+            }
+            if (state !== 'playing') return;
+            if (k === 'ArrowLeft' || k === 'a' || k === 'A') moveLane(-1);
+            else if (k === 'ArrowRight' || k === 'd' || k === 'D') moveLane(1);
+            else if (k === 'ArrowUp' || k === 'w' || k === 'W' || k === ' ') doJump();
+            else if (k === 'ArrowDown' || k === 's' || k === 'S') doDuck();
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' '].includes(e.key)) e.preventDefault();
+            handleKey(e.key);
+        });
+
+        // Messages from the PocketPlay host (the TV forwards controller input).
+        window.addEventListener('message', (e) => {
+            const data = e.data;
+            if (data && data.type === 'pp-key' && typeof data.key === 'string') handleKey(data.key);
+            else if (data && data.type === 'pp-start') start();
+            else if (data && data.type === 'pp-reset') reset();
+        });
+
+        document.getElementById('start-btn').addEventListener('click', start);
+        document.getElementById('retry-btn').addEventListener('click', start);
+        renderer.domElement.addEventListener('pointerdown', () => { if (state !== 'playing') start(); });
+
+        // Loop -------------------------------------------------------------------
+        function spawnIfNeeded() {
+            // Spawn a fresh obstacle group once the furthest edge is far enough.
+            while (nextSpawnZ > -70) {
+                const lane = Math.floor(Math.random() * LANES.length);
+                const kind = Math.random() < 0.28 ? 'tall' : 'short';
+                // Ensure at least one lane stays open.
+                addObstacle(lane, nextSpawnZ, kind);
+                if (Math.random() < 0.35) {
+                    const other = (lane + 1 + Math.floor(Math.random() * (LANES.length - 1))) % LANES.length;
+                    addObstacle(other, nextSpawnZ, 'short');
+                }
+                nextSpawnZ -= SPAWN_GAP;
+            }
+        }
+
+        const tmp = new THREE.Vector3();
+        function update(dt) {
+            // Ease the player toward the target lane.
+            player.position.x += (targetX - player.position.x) * Math.min(1, dt * 14);
+
+            if (state === 'playing') {
+                speed = BASE_SPEED + Math.min(18, score * 0.05);
+                score += dt * speed * 0.35;
+                hudScore.textContent = String(Math.floor(score));
+                hudSpeed.textContent = `${(speed / BASE_SPEED).toFixed(1)}x`;
+
+                // Vertical physics (feet height + jump).
+                if (jumping || playerY > 0) {
+                    velY += GRAVITY * dt;
+                    playerY += velY * dt;
+                    if (playerY <= 0) { playerY = 0; velY = 0; jumping = false; }
+                }
+                const targetScaleY = ducking && !jumping ? DUCK_FACTOR : 1;
+                player.scale.y += (targetScaleY - player.scale.y) * Math.min(1, dt * 16);
+                player.position.y = playerY + 0.5 * player.scale.y;
+
+                // Advance obstacles; recycle when they pass the camera.
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    const o = obstacles[i];
+                    o.mesh.position.z += speed * dt;
+                    if (o.mesh.position.z > 12) {
+                        scene.remove(o.mesh);
+                        o.mesh.material.dispose();
+                        obstacles.splice(i, 1);
+                        continue;
+                    }
+                    // Collision test (cheap AABB in x/z, plus height).
+                    const nearZ = Math.abs(o.mesh.position.z) < (o.mesh.scale.z * 1.7 * 0.5 + 0.5);
+                    const sameLane = Math.abs(o.mesh.position.x - player.position.x) < 1.1;
+                    const hitVertically = playerY < o.height;
+                    if (nearZ && sameLane && hitVertically) { gameOver(); break; }
+                }
+                nextSpawnZ += speed * dt;
+                spawnIfNeeded();
+            }
+        }
+
+        function animate(now) {
+            const dt = Math.min(0.05, (now - lastT) / 1000) || 0;
+            lastT = now;
+            update(dt);
+            // Scroll the grid.
+            gridTex.offset.y = (gridTex.offset.y - (state === 'playing' ? speed : 6) * dt * 0.03) % 1;
+            player.rotation.y += dt * (state === 'playing' ? 2.4 : 0.6);
+            renderer.render(scene, camera);
+            requestAnimationFrame(animate);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Test / integration handle.
+        window.__ppRunner = {
+            get state() { return state; },
+            get score() { return Math.floor(score); },
+            get lane() { return playerLane; },
+            get obstacles() { return obstacles.length; },
+            start,
+            reset,
+            handleKey,
+        };
+
+        reset();
+        requestAnimationFrame(animate);
+    </script>
+</body>
+</html>

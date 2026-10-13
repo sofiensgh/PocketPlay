@@ -73,6 +73,36 @@ function broadcastRoster() {
 // (A/B/X/Y) are handled by the game; everything else drives the TV UI.
 const NAV_KEYS = { LEFT: 'ArrowLeft', RIGHT: 'ArrowRight', UP: 'ArrowLeft', DOWN: 'ArrowRight' };
 
+// While a full-screen 3D game overlay is open, the host's gamepad drives the
+// game directly (all four directions distinct) instead of the dashboard.
+const GAME_KEYS = { LEFT: 'ArrowLeft', RIGHT: 'ArrowRight', UP: 'ArrowUp', DOWN: 'ArrowDown' };
+
+let activeGame = null;
+
+function openGame(slug) {
+    const frame = el('game-frame');
+    const overlay = el('game-overlay');
+    if (!frame || !overlay) return;
+    activeGame = slug;
+    frame.src = `/games/${slug}/index.html`;
+    overlay.hidden = false;
+    frame.addEventListener('load', () => { try { frame.focus(); } catch (err) { /* ignore */ } }, { once: true });
+}
+
+function closeGame() {
+    if (!activeGame) return;
+    activeGame = null;
+    const frame = el('game-frame');
+    const overlay = el('game-overlay');
+    if (frame) frame.src = 'about:blank';
+    if (overlay) overlay.hidden = true;
+}
+
+function sendToGame(key) {
+    const frame = el('game-frame');
+    if (frame && frame.contentWindow) frame.contentWindow.postMessage({ type: 'pp-key', key }, '*');
+}
+
 function pressKey(key) {
     const target = document.body || document;
     target.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }));
@@ -84,6 +114,13 @@ function backToDashboard() {
 }
 
 function handleMove(playerId, button) {
+    if (activeGame) {
+        if (playerId !== game.hostId) return; // the showcase game is driven by the host remote
+        if (GAME_KEYS[button]) sendToGame(GAME_KEYS[button]);
+        else if (button === 'A') sendToGame('Enter');
+        else if (button === 'B' || button === 'HOME' || button === 'START') closeGame();
+        return;
+    }
     const isAnswer = Object.prototype.hasOwnProperty.call(BUTTON_TO_INDEX, button);
     if (game.phase === 'question' && isAnswer) {
         game.submitAnswer(playerId, BUTTON_TO_INDEX[button]);
@@ -357,6 +394,14 @@ async function init() {
     el('start-btn').addEventListener('click', () => game.start());
     el('again-btn').addEventListener('click', () => game.reset());
 
+    // 3D game overlay: opened from the carousel tile, closed with ✕, B/Home on
+    // the host remote, or the Escape key.
+    el('card-runner')?.addEventListener('click', () => openGame('neon-runner'));
+    el('game-overlay-close')?.addEventListener('click', closeGame);
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && activeGame) closeGame();
+    });
+
     showView('lobby');
     renderPlayers();
 
@@ -430,7 +475,15 @@ async function init() {
         }
 
         // Debug/test handle (used by the headless smoke test).
-        window.__pp = { game, match };
+        window.__pp = {
+            game,
+            match,
+            openGame,
+            closeGame,
+            sendToGame,
+            handleMove,
+            get activeGame() { return activeGame; },
+        };
     } catch (err) {
         el('status').textContent = `Could not start lobby: ${err.message || err}`;
         console.error(err);

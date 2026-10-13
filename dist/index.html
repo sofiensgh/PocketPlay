@@ -450,42 +450,320 @@
             body { padding: 28px 16px; }
             h1 { font-size: 2.7rem; }
         }
+        :root {
+            --bg-base: #070912;
+            --bg-elevated: #101422;
+            --bg-card: #131a2a;
+            --gradient-start: #81f7e2;
+            --gradient-mid: #48b5ff;
+            --gradient-end: #9a7bff;
+            --text-muted: #a0abc0;
+            --border-subtle: rgba(180, 204, 255, .12);
+            --gradient: linear-gradient(110deg, #a3ffed 0%, #61caff 48%, #a88aff 100%);
+        }
+        body {
+            justify-content: flex-start;
+            padding: 0 clamp(20px, 5vw, 76px) 44px;
+            background:
+                radial-gradient(ellipse at 77% 27%, rgba(39, 92, 171, .16), transparent 34%),
+                radial-gradient(ellipse at 8% 70%, rgba(40, 156, 151, .09), transparent 32%),
+                var(--bg-base);
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: .17;
+            background-image: linear-gradient(rgba(180, 204, 255, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(180, 204, 255, .035) 1px, transparent 1px);
+            background-size: 58px 58px;
+            mask-image: linear-gradient(to bottom, black, transparent 78%);
+        }
+        .glow-tl { top: -34vw; left: -35vw; background: rgba(34, 211, 238, .12); }
+        .glow-br { background: rgba(111, 91, 255, .13); }
+        .topbar, .page-shell { position: relative; z-index: 1; width: min(100%, 1160px); }
+        .topbar {
+            min-height: 88px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(180, 204, 255, .1);
+        }
+        .brand { display: inline-flex; align-items: center; gap: 12px; color: #f5f8ff; text-decoration: none; font-weight: 800; letter-spacing: -.04em; font-size: 1.2rem; }
+        .brand img { width: 38px; height: 38px; border-radius: 12px; object-fit: cover; box-shadow: 0 0 22px rgba(88, 192, 255, .22); }
+        .brand-name span { color: #8debdc; }
+        .nav-link { color: #a4aec1; text-decoration: none; font-size: .78rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; transition: color .2s ease; }
+        .nav-link:hover { color: #fff; }
+        .system-status { display: inline-flex; align-items: center; gap: 9px; color: #b6c3d8; font-size: .7rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+        .system-status i, .live-dot { display: block; width: 7px; height: 7px; border-radius: 50%; background: #72f4c1; box-shadow: 0 0 14px rgba(114, 244, 193, .8); animation: status-breathe 2.4s ease-in-out infinite; }
+        @keyframes status-breathe { 50% { opacity: .55; box-shadow: 0 0 5px rgba(114, 244, 193, .55); } }
+        .page-shell { padding-top: clamp(46px, 8vh, 92px); }
+        .hero {
+            width: 100%;
+            max-width: none;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(340px, .92fr);
+            align-items: center;
+            gap: clamp(28px, 6vw, 84px);
+            text-align: left;
+        }
+        .hero-copy { min-width: 0; }
+        .eyebrow { display: inline-flex; align-items: center; gap: 10px; color: #9dacc5; font-size: .72rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+        .eyebrow::before { content: ""; width: 22px; height: 1px; background: #76e8db; box-shadow: 0 0 10px #76e8db; }
+        h1 { margin: 22px 0 18px; max-width: 650px; font-size: clamp(3rem, 6.4vw, 5.8rem); line-height: .99; letter-spacing: -.075em; font-weight: 800; }
+        .grad-text { background-image: linear-gradient(100deg, #9dffe9, #72c9ff 57%, #ad9aff); }
+        .tagline { margin: 0 0 12px; color: #e5eaf5; font-size: clamp(1.08rem, 1.7vw, 1.35rem); font-weight: 600; letter-spacing: -.025em; }
+        .subtagline { max-width: 465px; margin: 0; color: #929db3; font-size: .98rem; line-height: 1.8; opacity: 1; }
+        .hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; margin-top: 32px; }
+        .start-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 13px;
+            padding: 16px 26px;
+            border: 1px solid rgba(169, 255, 238, .7);
+            border-radius: 10px;
+            background: linear-gradient(110deg, #a3ffed, #69d6e7 53%, #88c8ff);
+            color: #071016;
+            font-family: inherit;
+            font-size: .88rem;
+            font-weight: 800;
+            letter-spacing: .015em;
+            box-shadow: 0 8px 32px rgba(72, 210, 211, .2), inset 0 1px rgba(255,255,255,.65);
+            animation: none;
+            transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+        }
+        .start-btn:hover { transform: translateY(-3px); box-shadow: 0 14px 42px rgba(72, 210, 211, .32); filter: brightness(1.06); }
+        .start-btn:active { transform: translateY(0) scale(.98); }
+        .start-btn:focus-visible, .nav-link:focus-visible, .step-card:focus-visible { outline: 2px solid #9dffe9; outline-offset: 4px; }
+        .play-icon { font-size: .72rem; }
+        .secondary-link { padding: 13px 12px; color: #d0d8e8; font-size: .84rem; font-weight: 600; text-decoration: none; transition: color .2s ease; }
+        .secondary-link:hover { color: #91f3e2; }
+        .showcase {
+            position: relative;
+            isolation: isolate;
+            min-height: 390px;
+            overflow: hidden;
+            border: 1px solid rgba(161, 200, 255, .19);
+            border-radius: 20px;
+            background: linear-gradient(145deg, rgba(27, 42, 72, .93), rgba(10, 14, 27, .96) 68%);
+            box-shadow: 0 35px 100px rgba(0, 0, 0, .38), inset 0 1px rgba(255, 255, 255, .07);
+            transform: translateZ(0);
+            transition: border-color .35s ease, transform .45s cubic-bezier(.2,.75,.25,1), box-shadow .35s ease;
+        }
+        .showcase:hover { transform: translateY(-5px); border-color: rgba(122, 221, 255, .4); box-shadow: 0 42px 110px rgba(0,0,0,.48), 0 0 50px rgba(80, 164, 255, .09); }
+        .showcase::before {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            width: 440px;
+            height: 440px;
+            top: -84px;
+            right: -48px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 38%, rgba(149, 250, 226, .95), rgba(69, 186, 255, .68) 19%, rgba(85, 81, 210, .62) 42%, rgba(26, 30, 73, .06) 70%);
+            filter: blur(2px);
+            animation: planet-drift 9s ease-in-out infinite alternate;
+        }
+        .showcase::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            opacity: .45;
+            background: radial-gradient(1px 1px at 17% 22%, #fff 50%, transparent 100%), radial-gradient(2px 2px at 28% 60%, #8bedff 50%, transparent 100%), radial-gradient(1px 1px at 78% 67%, #fff 50%, transparent 100%), radial-gradient(1px 1px at 54% 17%, #fff 50%, transparent 100%), linear-gradient(transparent 64%, rgba(8, 13, 26, .94));
+            background-size: 190px 140px, 230px 180px, 170px 210px, 250px 180px, auto;
+        }
+        @keyframes planet-drift { to { transform: translate3d(-12px, 12px, 0) scale(1.06); } }
+        .showcase-top, .showcase-bottom { position: absolute; left: 26px; right: 26px; display: flex; justify-content: space-between; align-items: center; }
+        .showcase-top { top: 23px; }
+        .showcase-bottom { bottom: 24px; align-items: flex-end; }
+        .game-label { color: #d1dced; font-size: .65rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; }
+        .live-label { display: inline-flex; align-items: center; gap: 8px; color: #b6c7dc; font-size: .65rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+        .game-art {
+            position: absolute;
+            top: 52px;
+            right: 10%;
+            width: 66%;
+            height: 66%;
+            display: grid;
+            place-items: center;
+            perspective: 700px;
+        }
+        .art-orbit { position: absolute; width: 95%; aspect-ratio: 1; border: 1px solid rgba(202, 231, 255, .28); border-radius: 50%; transform: rotateX(67deg) rotateZ(-25deg); box-shadow: 0 0 24px rgba(132, 213, 255, .12), inset 0 0 32px rgba(132, 213, 255, .08); animation: orbit-turn 18s linear infinite; }
+        .art-orbit::before, .art-orbit::after { content: ""; position: absolute; inset: 12%; border: 1px solid rgba(202, 231, 255, .18); border-radius: 50%; }
+        .art-orbit::after { inset: -9%; border-color: rgba(202, 231, 255, .12); }
+        @keyframes orbit-turn { to { transform: rotateX(67deg) rotateZ(335deg); } }
+        .art-core { position: relative; width: 44%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 34% 27%, #f1fff9 0 2%, #9cffe9 5%, #72c7ff 25%, #5c66ce 54%, #1b2045 73%); box-shadow: 0 0 35px rgba(104, 227, 255, .55), 0 0 100px rgba(107, 129, 255, .35); animation: core-pulse 4s ease-in-out infinite; }
+        .art-core::after { content: ""; position: absolute; inset: 8%; border-radius: 50%; background: linear-gradient(128deg, transparent 25%, rgba(255,255,255,.27) 27%, transparent 29%); }
+        @keyframes core-pulse { 50% { transform: scale(1.035); filter: hue-rotate(12deg); box-shadow: 0 0 48px rgba(104, 227, 255, .72), 0 0 118px rgba(107, 129, 255, .42); } }
+        .game-title { margin: 0; color: #f3f6ff; font-size: clamp(1.25rem, 2.2vw, 1.75rem); font-weight: 800; letter-spacing: -.04em; }
+        .game-caption { margin: 5px 0 0; color: #a8b5cb; font-size: .77rem; }
+        .player-count { display: flex; align-items: center; gap: 10px; color: #c6d0e1; font-size: .69rem; font-weight: 600; }
+        .player-avatars { display: flex; padding-left: 6px; }
+        .player-avatars i { width: 25px; height: 25px; margin-left: -6px; border: 2px solid #18263b; border-radius: 50%; background: linear-gradient(140deg, #a2ffe6, #469ecb); }
+        .player-avatars i:nth-child(2) { background: linear-gradient(140deg, #d0b1ff, #7962d3); }
+        .player-avatars i:nth-child(3) { background: linear-gradient(140deg, #ffcf9e, #e27b8c); }
+        .how {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            max-width: none;
+            margin: clamp(72px, 11vh, 112px) 0 0;
+            padding-top: 27px;
+            border-top: 1px solid rgba(180, 204, 255, .11);
+        }
+        .section-heading { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 5px; }
+        .section-kicker { margin: 0; color: #91a2bc; font-size: .67rem; font-weight: 700; letter-spacing: .17em; text-transform: uppercase; }
+        .section-title { margin: 5px 0 0; color: #eef3fc; font-size: 1.15rem; font-weight: 700; letter-spacing: -.035em; }
+        .step-card {
+            min-height: 144px;
+            padding: 20px;
+            border-radius: 13px;
+            background: linear-gradient(145deg, rgba(20, 28, 45, .82), rgba(13, 18, 31, .62));
+            transition: transform .25s ease, border-color .25s ease, background .25s ease;
+        }
+        .step-card:hover { transform: translateY(-4px); border-color: rgba(119, 227, 224, .38); background: linear-gradient(145deg, rgba(25, 41, 58, .9), rgba(15, 21, 37, .8)); box-shadow: 0 16px 40px rgba(0,0,0,.2); }
+        .step-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .step-num { width: 30px; height: 30px; margin: 0; border: 1px solid rgba(126, 235, 221, .3); background: rgba(83, 200, 190, .1); color: #a2f5e4; box-shadow: none; font-size: .78rem; }
+        .step-mark { color: rgba(180, 204, 255, .42); font-size: 1rem; }
+        .step-card h3 { margin-bottom: 5px; font-size: .96rem; }
+        .step-card p { color: #9ba8be; font-size: .8rem; line-height: 1.65; }
+        .footer-note { display: flex; justify-content: center; gap: 9px; margin-top: 26px; color: #7f8ca2; font-size: .72rem; }
+        .footer-note strong { color: #b6c3d8; font-weight: 600; }
+        #loading-overlay:not(.active) .ppl-loader * { animation-play-state: paused !important; }
+        #loading-overlay.active .ppl-loader * { animation-play-state: running; }
+        #bg .spark { animation-play-state: paused; }
+        #loading-overlay.active #bg .spark { animation-play-state: running; }
+        .ppl-loader .word span { animation-delay: calc(.25s + var(--i) * .045s); }
+        .ppl-loader .pill:nth-child(1) { animation-delay: .4s, .75s; }
+        .ppl-loader .pill:nth-child(2) { animation-delay: .55s, 1.1s; }
+        .ppl-loader .pill:nth-child(3) { animation-delay: .7s, 1.45s; }
+        .ppl-loader .pill:nth-child(4) { animation-delay: .85s, 1.8s; }
+        .ppl-loader .pill:nth-child(1) i { animation-delay: .75s; }
+        .ppl-loader .pill:nth-child(2) i { animation-delay: 1.1s; }
+        .ppl-loader .pill:nth-child(3) i { animation-delay: 1.45s; }
+        .ppl-loader .pill:nth-child(4) i { animation-delay: 1.8s; }
+        @media (max-width: 760px) {
+            body { padding: 0 22px 34px; }
+            .topbar { min-height: 72px; }
+            .hero { grid-template-columns: 1fr; gap: 38px; }
+            .page-shell { padding-top: 54px; }
+            .showcase { min-height: 340px; }
+            .how { margin-top: 60px; }
+        }
+        @media (max-width: 560px) {
+            body { padding: 0 17px 28px; }
+            .topbar { min-height: 66px; }
+            .brand { font-size: 1.05rem; }
+            .brand img { width: 33px; height: 33px; }
+            .system-status { font-size: .58rem; letter-spacing: .08em; }
+            .page-shell { padding-top: 43px; }
+            .hero { gap: 30px; }
+            h1 { margin: 18px 0 13px; font-size: clamp(2.85rem, 13vw, 4.1rem); }
+            .subtagline { font-size: .91rem; }
+            .hero-actions { gap: 7px; margin-top: 24px; }
+            .start-btn { padding: 14px 18px; font-size: .82rem; }
+            .secondary-link { font-size: .78rem; }
+            .showcase { min-height: 300px; border-radius: 16px; }
+            .showcase-top, .showcase-bottom { left: 18px; right: 18px; }
+            .showcase-top { top: 18px; }
+            .showcase-bottom { bottom: 19px; }
+            .game-art { top: 43px; right: 8%; width: 76%; height: 65%; }
+            .game-title { font-size: 1.1rem; }
+            .game-caption { font-size: .68rem; }
+            .player-count { gap: 6px; font-size: .6rem; }
+            .player-count > span:last-child { display: none; }
+            .how { grid-template-columns: 1fr; gap: 10px; margin-top: 50px; padding-top: 22px; }
+            .step-card { min-height: 0; padding: 16px; }
+            .step-head { margin-bottom: 10px; }
+            .section-heading { display: block; margin-bottom: 4px; }
+            .footer-note { flex-wrap: wrap; font-size: .65rem; }
+            .ppl-loader .lobby { gap: 6px; }
+            .ppl-loader .pill { padding: 6px 9px 6px 7px; font-size: 10px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .showcase::before, .art-orbit, .art-core, .system-status i { animation: none; }
+            .showcase, .step-card, .start-btn { transition: none; }
+        }
     </style>
-  <script type="module" crossorigin src="/assets/main-Buc3GZLS.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <script type="module" crossorigin src="/assets/main-DNnjEA4W.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/console-theme-C3qoERNF.js">
+  <link rel="stylesheet" crossorigin href="/assets/console-theme-BpUr8PQy.css">
 </head>
 <body>
     <div class="glow glow-tl"></div>
     <div class="glow glow-br"></div>
 
-    <main class="hero">
-        <div class="logo-wrap fade-up">
-            <div class="logo-sheen"></div>
-            <img class="logo" src="/images/PocketPlayorg.png" alt="PocketPlay logo" />
-        </div>
-        <h1 class="fade-up">Pocket<span class="grad-text">Play</span></h1>
-        <p class="tagline fade-up">Your phone is the controller.</p>
-        <p class="subtagline fade-up">Play party games on your TV with friends. No console. No downloads.</p>
-        <button id="start-btn" class="start-btn fade-up">&#9654; Start a Game</button>
-    </main>
+    <header class="topbar">
+        <a class="brand" href="/" aria-label="PocketPlay home">
+            <img src="/images/PocketPlayorg.png" alt="" />
+            <span class="brand-name">Pocket<span>Play</span></span>
+        </a>
+        <a class="nav-link" href="#how-it-works">How to play</a>
+        <div class="system-status"><i></i> Ready for players</div>
+    </header>
 
-    <section class="how">
-        <a class="step-card fade-up" href="/screen.html" data-go-screen>
-            <div class="step-num">1</div>
-            <h3>Open it on your TV</h3>
-            <p>Open PocketPlay on your TV or computer.</p>
-        </a>
-        <a class="step-card fade-up" href="/screen.html" data-go-screen>
-            <div class="step-num">2</div>
-            <h3>Scan the QR</h3>
-            <p>Friends scan the QR code with their phones.</p>
-        </a>
-        <a class="step-card fade-up" href="/screen.html" data-go-screen>
-            <div class="step-num">3</div>
-            <h3>Play together</h3>
-            <p>No downloads needed — phones become controllers.</p>
-        </a>
-    </section>
+    <div class="page-shell">
+        <main class="hero">
+            <div class="hero-copy">
+                <div class="eyebrow fade-up">The living-room multiplayer</div>
+                <h1 class="fade-up">Big screen<br /><span class="grad-text">energy.</span></h1>
+                <p class="tagline fade-up">Your phone is the controller.</p>
+                <p class="subtagline fade-up">Bring everyone into the game. Pick a screen, grab your phones, and turn any room into game night.</p>
+                <div class="hero-actions fade-up">
+                    <button id="start-btn" class="start-btn"><span class="play-icon">&#9654;</span> Start a Game <span aria-hidden="true">&#8594;</span></button>
+                    <a class="secondary-link" href="#how-it-works">See how it works <span aria-hidden="true">&#8595;</span></a>
+                </div>
+            </div>
+
+            <section class="showcase fade-up" aria-label="PocketPlay game night preview">
+                <div class="showcase-top">
+                    <span class="game-label">Your living-room arcade</span>
+                    <span class="live-label"><i class="live-dot"></i> Game night, live</span>
+                </div>
+                <div class="game-art" aria-hidden="true">
+                    <div class="art-orbit"></div>
+                    <div class="art-core"></div>
+                </div>
+                <div class="showcase-bottom">
+                    <div>
+                        <h2 class="game-title">One screen. All in.</h2>
+                        <p class="game-caption">The next great night starts here.</p>
+                    </div>
+                    <div class="player-count">
+                        <span class="player-avatars" aria-hidden="true"><i></i><i></i><i></i></span>
+                        <span>Bring your crew</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <section class="how" id="how-it-works" aria-labelledby="how-title">
+            <div class="section-heading">
+                <div>
+                    <p class="section-kicker">No console. No downloads. Just play.</p>
+                    <h2 class="section-title" id="how-title">Game night in three steps</h2>
+                </div>
+            </div>
+            <a class="step-card fade-up" href="/screen.html" data-go-screen>
+                <div class="step-head"><div class="step-num">01</div><span class="step-mark" aria-hidden="true">&#8599;</span></div>
+                <h3>Pick your big screen</h3>
+                <p>Open PocketPlay on a TV, laptop, or anything with a browser.</p>
+            </a>
+            <a class="step-card fade-up" href="/screen.html" data-go-screen>
+                <div class="step-head"><div class="step-num">02</div><span class="step-mark" aria-hidden="true">&#8599;</span></div>
+                <h3>Bring your phones</h3>
+                <p>Join the room in seconds. Your phone is already the controller.</p>
+            </a>
+            <a class="step-card fade-up" href="/screen.html" data-go-screen>
+                <div class="step-head"><div class="step-num">03</div><span class="step-mark" aria-hidden="true">&#8599;</span></div>
+                <h3>Let the rivalry begin</h3>
+                <p>Get your friends together and make the living room the arena.</p>
+            </a>
+        </section>
+        <div class="footer-note"><span class="live-dot"></span><strong>Made for the room you’re in.</strong><span>Free to play with friends.</span></div>
+    </div>
 
     <div id="loading-overlay">
         <div id="bg"></div>

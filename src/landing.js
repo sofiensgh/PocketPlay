@@ -1,11 +1,32 @@
 const startBtn = document.getElementById('start-btn');
 const overlay = document.getElementById('loading-overlay');
+const showcase = document.querySelector('.showcase');
+
+/* Let the featured tile respond to the player, like a focused dashboard tile. */
+if (showcase && matchMedia('(hover: hover) and (pointer: fine)').matches
+    && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    showcase.addEventListener('pointermove', (event) => {
+        const rect = showcase.getBoundingClientRect();
+        const x = (event.clientX - rect.left) / rect.width;
+        const y = (event.clientY - rect.top) / rect.height;
+        showcase.style.setProperty('--cursor-x', `${x * 100}%`);
+        showcase.style.setProperty('--cursor-y', `${y * 100}%`);
+        showcase.style.setProperty('--tilt-x', `${(0.5 - y) * 3}deg`);
+        showcase.style.setProperty('--tilt-y', `${(x - 0.5) * 4}deg`);
+    });
+    showcase.addEventListener('pointerleave', () => {
+        showcase.style.setProperty('--tilt-x', '0deg');
+        showcase.style.setProperty('--tilt-y', '0deg');
+        showcase.style.setProperty('--cursor-x', '72%');
+        showcase.style.setProperty('--cursor-y', '42%');
+    });
+}
 
 /* ---------- floating particles ---------- */
 (function () {
     const bg = document.getElementById('bg');
     if (!bg) return;
-    const cols = ['#22d3ff', '#ff4fa3', '#ffd23f', '#45e68a', '#a64bff', '#7aa2ff'];
+    const cols = ['#31c5ff', '#397fff', '#7547ff', '#d34dff', '#63a6ff', '#a47aff'];
     for (let i = 0; i < 22; i++) {
         const s = document.createElement('div');
         s.className = 'spark';

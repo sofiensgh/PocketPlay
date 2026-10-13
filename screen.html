@@ -694,6 +694,9 @@
         .game-card.join {
             background: linear-gradient(150deg, #60A5FA 0%, #4F46E5 55%, #312E81 100%);
         }
+        .game-card.runner {
+            background: linear-gradient(150deg, #FB7185 0%, #DB2777 50%, #6D28D9 100%);
+        }
         .game-card.selected {
             border-color: #fff;
             transform: translateY(-4px) scale(1.03);
@@ -707,6 +710,36 @@
             transform: translateY(-2px);
         }
         .game-card.locked { cursor: default; }
+
+        #game-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-base);
+        }
+        #game-overlay[hidden] { display: none; }
+        .game-overlay-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 12px 20px;
+            background: rgba(10, 10, 20, 0.9);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+        .game-overlay-title {
+            font-weight: 800;
+            letter-spacing: -0.01em;
+            font-size: 1.05rem;
+        }
+        #game-frame {
+            flex: 1;
+            width: 100%;
+            border: 0;
+            background: var(--bg-base);
+        }
 
         .hints {
             position: fixed;
@@ -1029,6 +1062,7 @@
             * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
         }
     </style>
+    <link rel="stylesheet" href="/src/console-theme.css" />
 </head>
 <body>
     <div class="bg-layer">
@@ -1109,24 +1143,29 @@
         <div class="carousel-wrap">
             <p class="carousel-label">Games</p>
             <div class="carousel" id="carousel">
-                <div class="game-card trivia selected">
+                <div class="game-card trivia selected" data-title="Trivia" data-icon="?" data-tag="Play now" data-description="Answer fast. Score higher. The first correct answer earns double points." role="button" tabindex="0" aria-label="Select Trivia">
                     <span class="g-icon">?</span>
                     <p class="g-name">Trivia</p>
                     <span class="g-tag">Play now</span>
                 </div>
-                <div class="game-card drawing locked">
+                <div class="game-card runner" id="card-runner" data-game="neon-runner" data-title="Neon Runner" data-icon="03" data-tag="3D · Play now" data-description="Race through a neon world. Grab the host remote and jump straight into the action." role="button" tabindex="0" aria-label="Play Neon Runner">
+                    <span class="g-icon">🏁</span>
+                    <p class="g-name">Neon Runner</p>
+                    <span class="g-tag">3D · Play now</span>
+                </div>
+                <div class="game-card drawing locked" data-title="Drawing" data-icon="∿" data-tag="Coming soon" data-description="A fresh party game is on the way." role="button" tabindex="0" aria-disabled="true" aria-label="Drawing, coming soon">
                     <span class="g-lock">🔒</span>
                     <span class="g-icon">∿</span>
                     <p class="g-name">Drawing</p>
                     <span class="g-tag">Coming soon</span>
                 </div>
-                <div class="game-card word locked">
+                <div class="game-card word locked" data-title="Word Race" data-icon="W" data-tag="Coming soon" data-description="A fresh party game is on the way." role="button" tabindex="0" aria-disabled="true" aria-label="Word Race, coming soon">
                     <span class="g-lock">🔒</span>
                     <span class="g-icon">W</span>
                     <p class="g-name">Word Race</p>
                     <span class="g-tag">Coming soon</span>
                 </div>
-                <a class="game-card join" id="carousel-join" target="_blank" rel="noopener">
+                <a class="game-card join" id="carousel-join" data-title="Join a game" data-icon="+" data-tag="Use this device" data-description="Use your phone or another device to join a friend’s living-room game." target="_blank" rel="noopener" aria-label="Join a game on this device">
                     <span class="g-icon">📱</span>
                     <p class="g-name">Join a game</p>
                     <span class="g-tag">Use this device</span>
@@ -1193,6 +1232,14 @@
         <span><b>F</b> Fullscreen</span>
     </div>
 
+    <div id="game-overlay" hidden>
+        <div class="game-overlay-bar">
+            <span class="game-overlay-title">🏁 Neon Runner 3D</span>
+            <button class="ghost-btn" id="game-overlay-close">✕ Close</button>
+        </div>
+        <iframe id="game-frame" title="Neon Runner 3D" allow="fullscreen" src="about:blank"></iframe>
+    </div>
+
     <script type="module" src="/src/screen.js"></script>
     <script>
         (function () {
@@ -1253,13 +1300,20 @@
 
         document.addEventListener('keydown', (e) => {
             if (e.target && typeof e.target.matches === 'function' && e.target.matches('input, textarea')) return;
+            const overlay = document.getElementById('game-overlay');
+            const overlayOpen = overlay && !overlay.hidden;
             if (e.key === 'f' || e.key === 'F') {
                 document.getElementById('fullscreen-btn').click();
             }
             if (e.key === 'Enter') {
+                if (overlayOpen) return;
                 if (document.getElementById('view-lobby').hidden) return;
                 const selected = document.querySelector('.game-card.selected');
                 if (selected && selected.id === 'carousel-join') {
+                    selected.click();
+                    return;
+                }
+                if (selected && selected.dataset && selected.dataset.game) {
                     selected.click();
                     return;
                 }
@@ -1271,14 +1325,54 @@
 
         (function () {
             const cards = Array.from(document.querySelectorAll('.game-card'));
-            let idx = 0;
+            const featured = document.querySelector('.featured');
+            const featuredIcon = document.querySelector('.featured-icon');
+            const featuredName = document.querySelector('.featured-name');
+            const featuredTag = document.querySelector('.featured-tag');
+            const heroTitle = document.querySelector('.hero-title');
+            const heroDescription = document.querySelector('.hero-sub');
+            let idx = Math.max(0, cards.findIndex((card) => card.classList.contains('selected')));
+
+            const selectCard = (card) => {
+                if (!card) return;
+                cards.forEach((item) => item.classList.toggle('selected', item === card));
+                idx = cards.indexOf(card);
+                const { title, icon, tag, description, game } = card.dataset;
+                if (featured) featured.dataset.game = game
+                    ? 'runner'
+                    : ['trivia', 'drawing', 'word', 'join'].find((name) => card.classList.contains(name)) || 'trivia';
+                if (featuredIcon) featuredIcon.textContent = icon || '?';
+                if (featuredName) featuredName.textContent = title || 'PocketPlay';
+                if (featuredTag) featuredTag.textContent = tag || 'Play now';
+                if (heroDescription) heroDescription.textContent = description || '';
+                if (heroTitle) {
+                    const words = (title || 'Trivia').split(' ');
+                    const accent = words.pop();
+                    heroTitle.replaceChildren();
+                    if (words.length) heroTitle.append(`${words.join(' ')} `);
+                    const span = document.createElement('span');
+                    span.className = 'grad-text';
+                    span.textContent = accent;
+                    heroTitle.append(span);
+                }
+            };
+
+            cards.forEach((card) => {
+                card.addEventListener('pointerenter', () => selectCard(card));
+                card.addEventListener('focus', () => selectCard(card));
+                card.addEventListener('click', () => selectCard(card));
+            });
+            selectCard(cards[idx]);
+
             document.addEventListener('keydown', (e) => {
+                const overlay = document.getElementById('game-overlay');
+                if (overlay && !overlay.hidden) return;
                 if (document.getElementById('view-lobby').hidden) return;
+                if (e.target && e.target.closest && e.target.closest('.carousel') && e.key === 'Enter') return;
                 if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
                     e.preventDefault();
-                    cards.forEach((c) => c.classList.remove('selected'));
                     idx = (idx + (e.key === 'ArrowRight' ? 1 : -1) + cards.length) % cards.length;
-                    cards[idx].classList.add('selected');
+                    selectCard(cards[idx]);
                 }
             });
         })();
